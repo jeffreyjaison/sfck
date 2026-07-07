@@ -136,6 +136,14 @@ async function main() {
     await db.insert(s.attendance).values(attRows.slice(i, i + 100));
   }
 
+  // A few audit-trail entries so the Data Integrity panel is populated on first load
+  await db.insert(s.auditLog).values([
+    { actorRole: 'am', action: 'attendance-approved', entity: 'attendance:12' },
+    { actorRole: 'em', action: 'excess-voucher-created', entity: 'attendance:24' },
+    { actorRole: 'am', action: 'correction-approved', entity: 'collection:57' },
+    { actorRole: 'am', action: 'factory-dispatch', entity: 'stock:1 qty:150' },
+  ]);
+
   // Summary counts
   const allCcs = await db.select().from(s.collectionCentres);
   const allBlocks = await db.select().from(s.blocks);
