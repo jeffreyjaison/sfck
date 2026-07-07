@@ -14,6 +14,10 @@ describe('medicalLeavePayable', () => {
     expect(medicalLeavePayable({ requestedDays: 5, takenThisYear: 14, dailyWage: 300 }))
       .toEqual({ paidDays: 0, amount: 0 });
   });
+  it('rounds the paid amount to two decimals (paisa)', () => {
+    expect(medicalLeavePayable({ requestedDays: 5, takenThisYear: 0, dailyWage: 250 }))
+      .toEqual({ paidDays: 5, amount: 833.33 });
+  });
 });
 
 describe('annualLeaveAccrued', () => {
@@ -24,6 +28,9 @@ describe('annualLeaveAccrued', () => {
   it('accrues the first day exactly at 20 working days and none at 19', () => {
     expect(annualLeaveAccrued(20)).toBe(1);
     expect(annualLeaveAccrued(19)).toBe(0);
+  });
+  it('clamps negative working days to 0', () => {
+    expect(annualLeaveAccrued(-5)).toBe(0);
   });
 });
 
