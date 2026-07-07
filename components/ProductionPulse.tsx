@@ -56,7 +56,7 @@ export function ProductionPulse({
 
   return (
     <div
-      className="animate-rise relative overflow-hidden rounded-2xl p-6 text-white shadow-card"
+      className="animate-rise relative flex h-full flex-col justify-center overflow-hidden rounded-2xl p-6 text-white shadow-card"
       style={{ background: 'linear-gradient(135deg, var(--canopy), var(--canopy-2))' }}
     >
       <div className="relative z-10 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">

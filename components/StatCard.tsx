@@ -35,23 +35,26 @@ export function StatCard({
   icon?: React.ReactNode;
 }) {
   const t = resolveTone(tone, delta);
+  const hasFooter = Boolean(delta) || Boolean(series && series.length > 0);
   return (
-    <div className="group rounded-2xl border border-line bg-white p-5 shadow-card transition-shadow hover:shadow-card-hover">
+    <div className="group flex h-full flex-col rounded-2xl border border-line bg-white p-5 shadow-card transition-shadow hover:shadow-card-hover">
       <div className="flex items-start justify-between gap-3">
         <div className="text-[11px] font-semibold uppercase tracking-wider text-muted">{label}</div>
         {icon && <div className="shrink-0 text-[color:var(--emerald)]">{icon}</div>}
       </div>
       <div className="mono mt-2 text-3xl font-bold leading-none text-ink">{value}</div>
-      {delta && (
-        <div className="mt-2">
-          <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-semibold ${CHIP[t]}`}>
-            {delta}
-          </span>
-        </div>
-      )}
-      {series && series.length > 0 && (
-        <div className="mt-3">
-          <Sparkline values={series} width={220} height={36} className="w-full" />
+      {hasFooter && (
+        <div className="mt-auto pt-3">
+          {delta && (
+            <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-semibold ${CHIP[t]}`}>
+              {delta}
+            </span>
+          )}
+          {series && series.length > 0 && (
+            <div className={delta ? 'mt-3' : ''}>
+              <Sparkline values={series} width={220} height={36} className="w-full" />
+            </div>
+          )}
         </div>
       )}
     </div>

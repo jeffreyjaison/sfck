@@ -33,7 +33,7 @@ function EstatesJurisdictionPanel({
 }) {
   const productionByName = new Map(byEstate.map((e) => [e.estate, e]));
   return (
-    <div className="rounded-2xl border border-line bg-white p-5 shadow-card">
+    <div className="flex-1 rounded-2xl border border-line bg-white p-5 shadow-card">
       <h2 className="text-lg font-semibold text-ink">Estates — Jurisdiction</h2>
       <ul className="mt-3 space-y-2 text-sm">
         {allEstates.map((e) => {
@@ -78,7 +78,7 @@ function AuditTimelinePanel() {
   }));
 
   return (
-    <div className="rounded-2xl border border-line bg-white p-5 shadow-card">
+    <div className="flex-1 rounded-2xl border border-line bg-white p-5 shadow-card">
       <h2 className="text-lg font-semibold text-ink">Audit Trail — Data Integrity</h2>
       {items.length === 0 ? (
         <p className="mt-2 text-sm text-muted">No recorded activity yet.</p>
@@ -128,8 +128,8 @@ export default function DashboardPage() {
       )}
 
       {/* Hero row */}
-      <div className="grid gap-4 lg:grid-cols-3">
-        <div className="lg:col-span-2">
+      <div className="grid items-stretch gap-4 lg:grid-cols-3">
+        <div className="h-full lg:col-span-2">
           <ProductionPulse
             label="Latex — current period"
             value={stats.totalLatexKg}
@@ -139,7 +139,7 @@ export default function DashboardPage() {
           />
         </div>
         <div
-          className="animate-rise flex flex-col items-center justify-center rounded-2xl border border-line bg-white p-6 shadow-card"
+          className="animate-rise flex h-full flex-col items-center justify-center rounded-2xl border border-line bg-white p-6 shadow-card"
           style={{ '--rise-delay': '80ms' } as React.CSSProperties}
         >
           <RadialGauge value={avgDrc} max={100} label="Avg DRC" unit="%" />
@@ -148,7 +148,7 @@ export default function DashboardPage() {
       </div>
 
       {/* KPI row */}
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="grid items-stretch gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {[
           <StatCard key="aw" label="Active Workers" value={String(stats.activeWorkers)} />,
           <StatCard
@@ -172,7 +172,7 @@ export default function DashboardPage() {
         ].map((card, i) => (
           <div
             key={card.key}
-            className="animate-rise"
+            className="h-full animate-rise"
             style={{ '--rise-delay': `${120 + i * 60}ms` } as React.CSSProperties}
           >
             {card}
@@ -181,27 +181,30 @@ export default function DashboardPage() {
       </div>
 
       {/* Analytics row */}
-      <div className="grid gap-4 lg:grid-cols-3">
+      <div className="grid items-stretch gap-4 lg:grid-cols-3">
         <div
-          className="animate-rise lg:col-span-2"
+          className="h-full animate-rise lg:col-span-2"
           style={{ '--rise-delay': '160ms' } as React.CSSProperties}
         >
           <ProductionChart data={data.byEstate} />
         </div>
         <div
-          className="animate-rise rounded-2xl border border-line bg-white p-5 shadow-card"
+          className="flex h-full animate-rise flex-col rounded-2xl border border-line bg-white p-5 shadow-card"
           style={{ '--rise-delay': '220ms' } as React.CSSProperties}
         >
           <h2 className="text-lg font-semibold text-ink">Workforce mix</h2>
-          <div className="mt-5 flex justify-center">
+          <div className="mt-5 flex flex-1 items-center justify-center">
             <Donut segments={categoryMix(data.categoryMix)} />
           </div>
         </div>
       </div>
 
       {/* Jurisdiction + Audit row */}
-      <div className="grid gap-4 lg:grid-cols-2">
-        <div className="animate-rise" style={{ '--rise-delay': '260ms' } as React.CSSProperties}>
+      <div className="grid items-stretch gap-4 lg:grid-cols-2">
+        <div
+          className="flex h-full animate-rise flex-col"
+          style={{ '--rise-delay': '260ms' } as React.CSSProperties}
+        >
           <EstatesJurisdictionPanel allEstates={data.allEstates} byEstate={data.byEstate} />
           {restrictedCount > 0 && (
             <p className="mt-2 text-xs text-[color:var(--clay)]">
@@ -209,7 +212,10 @@ export default function DashboardPage() {
             </p>
           )}
         </div>
-        <div className="animate-rise" style={{ '--rise-delay': '300ms' } as React.CSSProperties}>
+        <div
+          className="flex h-full animate-rise flex-col"
+          style={{ '--rise-delay': '300ms' } as React.CSSProperties}
+        >
           <AuditTimelinePanel />
         </div>
       </div>
