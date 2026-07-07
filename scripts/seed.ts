@@ -1,26 +1,15 @@
 import './load-env';
 import { db } from '../lib/db/client';
 import * as s from '../lib/db/schema';
-import { eq } from 'drizzle-orm';
+import { eq, sql } from 'drizzle-orm';
 
 async function main() {
-  // Idempotency: clear existing rows in FK-safe order (children first)
-  await db.delete(s.payrollLines);
-  await db.delete(s.payrollRuns);
-  await db.delete(s.attendance);
-  await db.delete(s.collections);
-  await db.delete(s.leaveRecords);
-  await db.delete(s.requisitions);
-  await db.delete(s.auditLog);
-  await db.delete(s.stockItems);
-  await db.delete(s.replanting);
-  await db.delete(s.workers);
-  await db.delete(s.blocks);
-  await db.delete(s.collectionCentres);
-  await db.delete(s.divisions);
-  await db.delete(s.estates);
-  await db.delete(s.groups);
-  await db.delete(s.settings);
+  // Reset all tables AND their identity sequences so IDs are deterministic across reseeds
+  await db.execute(sql`TRUNCATE
+    payroll_lines, payroll_runs, attendance, collections, leave_records,
+    requisitions, audit_log, stock_items, replanting, workers, blocks,
+    collection_centres, divisions, estates, groups, settings
+    RESTART IDENTITY CASCADE`);
 
   // 1. Groups & estates (fixed, from the proposal)
   const [gA] = await db.insert(s.groups).values({ name: 'Group A' }).returning();
