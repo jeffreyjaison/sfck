@@ -148,7 +148,7 @@ export default function DashboardPage() {
       </div>
 
       {/* KPI row */}
-      <div className="grid items-stretch gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="grid grid-cols-2 items-stretch gap-3 sm:gap-4 lg:grid-cols-4">
         {[
           <StatCard key="aw" label="Active Workers" value={String(stats.activeWorkers)} />,
           <StatCard

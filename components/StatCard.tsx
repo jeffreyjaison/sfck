@@ -42,7 +42,7 @@ export function StatCard({
         <div className="text-[11px] font-semibold uppercase tracking-wider text-muted">{label}</div>
         {icon && <div className="shrink-0 text-[color:var(--emerald)]">{icon}</div>}
       </div>
-      <div className="mono mt-2 text-3xl font-bold leading-none text-ink">{value}</div>
+      <div className="mono mt-2 text-2xl font-bold leading-none text-ink sm:text-3xl">{value}</div>
       {hasFooter && (
         <div className="mt-auto pt-3">
           {delta && (
