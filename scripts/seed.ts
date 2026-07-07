@@ -1,0 +1,113 @@
+import './load-env';
+import { db } from '../lib/db/client';
+import * as s from '../lib/db/schema';
+
+async function main() {
+  // Idempotency: clear existing rows in FK-safe order (children first)
+  await db.delete(s.payrollLines);
+  await db.delete(s.payrollRuns);
+  await db.delete(s.attendance);
+  await db.delete(s.collections);
+  await db.delete(s.leaveRecords);
+  await db.delete(s.requisitions);
+  await db.delete(s.auditLog);
+  await db.delete(s.stockItems);
+  await db.delete(s.replanting);
+  await db.delete(s.workers);
+  await db.delete(s.blocks);
+  await db.delete(s.collectionCentres);
+  await db.delete(s.divisions);
+  await db.delete(s.estates);
+  await db.delete(s.groups);
+  await db.delete(s.settings);
+
+  // 1. Groups & estates (fixed, from the proposal)
+  const [gA] = await db.insert(s.groups).values({ name: 'Group A' }).returning();
+  const [gB] = await db.insert(s.groups).values({ name: 'Group B' }).returning();
+  const estateRows = await db.insert(s.estates).values([
+    { name: 'Chithalvetty', groupId: gA.id },
+    { name: 'Kumaramkudy', groupId: gA.id },
+    { name: 'Mullumala', groupId: gB.id },
+    { name: 'Cheruppittakkavu', groupId: gB.id },
+  ]).returning();
+
+  const classSpec = {
+    II:  { standardKg: '18', incentiveRate: '12' },
+    III: { standardKg: '15', incentiveRate: '10' },
+    IV:  { standardKg: '12', incentiveRate: '8' },
+  } as const;
+
+  let checkSeq = 1000;
+  for (const est of estateRows) {
+    for (let d = 1; d <= 2; d++) {
+      const [div] = await db.insert(s.divisions)
+        .values({ name: `${est.name} Division ${d}`, estateId: est.id }).returning();
+      for (let c = 1; c <= 2; c++) {
+        const [cc] = await db.insert(s.collectionCentres)
+          .values({ name: `CC ${est.name.slice(0,3)}-${d}${c}`, divisionId: div.id, area: 'Mature' })
+          .returning();
+        for (const bc of ['II', 'III', 'IV'] as const) {
+          await db.insert(s.blocks).values({
+            code: `${cc.name}-${bc}`, ccId: cc.id, blockClass: bc,
+            standardKg: classSpec[bc].standardKg, incentiveRate: classSpec[bc].incentiveRate,
+            treeCount: 350,
+          });
+        }
+        const people = [
+          { category: 'Permanent', type: 'Tapper' },
+          { category: 'Casual', type: 'Tapper' },
+          { category: 'Dependent', type: 'General' },
+          { category: 'Permanent', type: 'General' },
+        ] as const;
+        for (const p of people) {
+          checkSeq += 1;
+          await db.insert(s.workers).values({
+            checkRoll: `SFCK-${checkSeq}`,
+            name: `Worker ${checkSeq}`,
+            category: p.category, type: p.type,
+            gender: checkSeq % 2 ? 'Male' : 'Female',
+            dob: '1975-05-10', dateOfJoining: '2010-06-01',
+            mobile: `98${checkSeq}00`, email: null, address: `${est.name}`,
+            estateId: est.id, ccId: cc.id,
+          });
+        }
+      }
+    }
+    await db.insert(s.stockItems).values([
+      { estateId: est.id, name: 'Latex', unit: 'kg', balance: '4200' },
+      { estateId: est.id, name: 'Scrap', unit: 'kg', balance: '1100' },
+      { estateId: est.id, name: 'Ammonia', unit: 'L', balance: '260' },
+    ]);
+    await db.insert(s.replanting).values([
+      { estateId: est.id, blockCode: `${est.name}-RP14`, plantingYear: 2014, areaHa: '5.0',
+        surviving: 1600, decayed: 80, vacant: 20, expenditure: '850000', yieldKg: '3200' },
+      { estateId: est.id, blockCode: `${est.name}-RP18`, plantingYear: 2018, areaHa: '4.0',
+        surviving: 1400, decayed: 60, vacant: 40, expenditure: '620000', yieldKg: '0' },
+    ]);
+  }
+
+  await db.insert(s.settings).values([
+    { key: 'retirement_age', value: '58', label: 'Retirement Age' },
+    { key: 'working_days', value: '26', label: 'Approved Working Days / Month' },
+    { key: 'medical_leave_cap', value: '14', label: 'Medical Leave Cap (days/yr)' },
+    { key: 'pf_percent', value: '12', label: 'PF Percentage' },
+  ]);
+
+  // Summary counts
+  const allWorkers = await db.select().from(s.workers);
+  const allCcs = await db.select().from(s.collectionCentres);
+  const allBlocks = await db.select().from(s.blocks);
+  const allStock = await db.select().from(s.stockItems);
+  const allReplanting = await db.select().from(s.replanting);
+  const allSettings = await db.select().from(s.settings);
+
+  console.log('Seed complete.');
+  console.log(
+    `Estates: ${estateRows.length}, Workers: ${allWorkers.length}, ` +
+    `Collection Centres: ${allCcs.length}, Blocks: ${allBlocks.length}, ` +
+    `Stock Items: ${allStock.length}, Replanting: ${allReplanting.length}, ` +
+    `Settings: ${allSettings.length}`
+  );
+}
+
+main().catch((e) => { console.error(e); process.exit(1); });
