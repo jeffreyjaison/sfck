@@ -1,34 +1,97 @@
 @import "tailwindcss";
 
 :root {
-  --background: #f3f8f5;
-  --foreground: #171717;
+  /* Estate Console palette */
+  --canopy: #0B3D2E;
+  --canopy-2: #124E3A;
+  --paper: #F4F7F5;
+  --card: #FFFFFF;
+  --emerald: #059669;
+  --leaf: #34D399;
+  --latex: #F7F5EF;
+  --clay: #C2603A;
+  --ink: #12211B;
+  --muted: #5B6B63;
+  --line: #E2ECE7;
+
+  /* Back-compat aliases */
+  --background: var(--paper);
+  --foreground: var(--ink);
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
+  --color-background: var(--paper);
+  --color-foreground: var(--ink);
+  --color-canopy: var(--canopy);
+  --color-canopy-2: var(--canopy-2);
+  --color-paper: var(--paper);
+  --color-card: var(--card);
+  --color-emerald-brand: var(--emerald);
+  --color-leaf: var(--leaf);
+  --color-latex: var(--latex);
+  --color-clay: var(--clay);
+  --color-ink: var(--ink);
+  --color-muted: var(--muted);
+  --color-line: var(--line);
   --font-sans: var(--font-inter);
-  --font-mono: var(--font-geist-mono);
+  --font-mono: var(--font-mono);
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
+  background: var(--paper);
+  color: var(--ink);
   font-family: var(--font-inter), system-ui, sans-serif;
 }
 
-h1, h2, h3 {
-  font-family: var(--font-display), var(--font-inter), system-ui, sans-serif;
+h1, h2, h3, .font-display {
+  font-family: var(--font-display), system-ui, sans-serif;
   letter-spacing: -0.02em;
 }
 
-.font-display {
-  font-family: var(--font-display), var(--font-inter), system-ui, sans-serif;
+.mono {
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-variant-numeric: tabular-nums;
 }
 
 .tnum {
   font-variant-numeric: tabular-nums;
+}
+
+/* Layered soft card shadows */
+.shadow-card {
+  box-shadow: 0 1px 2px rgba(11, 61, 46, 0.05), 0 8px 24px -12px rgba(11, 61, 46, 0.18);
+}
+
+.shadow-card-hover {
+  box-shadow: 0 2px 4px rgba(11, 61, 46, 0.07), 0 16px 40px -14px rgba(11, 61, 46, 0.28);
+}
+
+/* Motion */
+@keyframes rise {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: none; }
+}
+
+.animate-rise {
+  animation: rise 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
+  animation-delay: var(--rise-delay, 0ms);
+}
+
+@keyframes draw {
+  from { stroke-dashoffset: var(--len); }
+  to { stroke-dashoffset: 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-rise {
+    animation: none !important;
+    opacity: 1 !important;
+    transform: none !important;
+  }
+  [data-draw] {
+    stroke-dashoffset: 0 !important;
+    animation: none !important;
+  }
 }
 
 @media print {
