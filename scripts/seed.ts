@@ -1,6 +1,7 @@
 import './load-env';
 import { db } from '../lib/db/client';
 import * as s from '../lib/db/schema';
+import { eq } from 'drizzle-orm';
 
 async function main() {
   // Idempotency: clear existing rows in FK-safe order (children first)
@@ -93,13 +94,57 @@ async function main() {
     { key: 'pf_percent', value: '12', label: 'PF Percentage' },
   ]);
 
-  // Summary counts
+  // ---- Operational data: production collections (incl. prior-year) + attendance ----
+  const tappers = await db.select().from(s.workers).where(eq(s.workers.type, 'Tapper'));
+
+  const daysCurrent = ['2026-07-01', '2026-07-02', '2026-07-03', '2026-07-04', '2026-07-05', '2026-07-06'];
+  const daysPrior   = ['2025-07-01', '2025-07-02', '2025-07-03', '2025-07-04', '2025-07-05', '2025-07-06'];
+  const drcFor = (i: number) => (0.40 + ((i % 6) * 0.01)).toFixed(2);
+
+  const collectionRows: (typeof s.collections.$inferInsert)[] = [];
+  tappers.forEach((w, i) => {
+    daysCurrent.forEach((day, di) => {
+      collectionRows.push({
+        workerId: w.id, ccId: w.ccId!, day,
+        latexKg: String(18 + ((i + di) % 8)), scrapKg: String(2 + ((i + di) % 4)),
+        drc: drcFor(i + di), locked: true, slipSentSms: true,
+      });
+    });
+    daysPrior.forEach((day, di) => {
+      collectionRows.push({
+        workerId: w.id, ccId: w.ccId!, day,
+        latexKg: String(15 + ((i + di) % 7)), scrapKg: String(2 + ((i + di) % 3)),
+        drc: drcFor(i + di), locked: true, slipSentSms: true,
+      });
+    });
+  });
+  for (let i = 0; i < collectionRows.length; i += 100) {
+    await db.insert(s.collections).values(collectionRows.slice(i, i + 100));
+  }
+
+  // Attendance for one recent day, varied times to demonstrate approval rules
   const allWorkers = await db.select().from(s.workers);
+  const attRows: (typeof s.attendance.$inferInsert)[] = [];
+  allWorkers.forEach((w, i) => {
+    let markedAt = '06:05';
+    let status: 'Approved' | 'Pending' | 'Rejected' = 'Approved';
+    let isExcess = false;
+    if (i % 17 === 0) { markedAt = '06:22'; status = 'Pending'; }          // AM approval queue (6:15-6:30)
+    else if (i % 23 === 0) { markedAt = '06:20'; status = 'Approved'; isExcess = true; } // excess -> voucher
+    attRows.push({ workerId: w.id, day: '2026-07-06', markedAt, isExcess, status });
+  });
+  for (let i = 0; i < attRows.length; i += 100) {
+    await db.insert(s.attendance).values(attRows.slice(i, i + 100));
+  }
+
+  // Summary counts
   const allCcs = await db.select().from(s.collectionCentres);
   const allBlocks = await db.select().from(s.blocks);
   const allStock = await db.select().from(s.stockItems);
   const allReplanting = await db.select().from(s.replanting);
   const allSettings = await db.select().from(s.settings);
+  const allCollections = await db.select().from(s.collections);
+  const allAttendance = await db.select().from(s.attendance);
 
   console.log('Seed complete.');
   console.log(
@@ -108,6 +153,7 @@ async function main() {
     `Stock Items: ${allStock.length}, Replanting: ${allReplanting.length}, ` +
     `Settings: ${allSettings.length}`
   );
+  console.log(`Collections: ${allCollections.length}, Attendance: ${allAttendance.length}`);
 }
 
 main().catch((e) => { console.error(e); process.exit(1); });
