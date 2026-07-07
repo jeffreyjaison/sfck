@@ -1,6 +1,6 @@
 export function AppFooter() {
   return (
-    <footer className="mt-auto border-t border-slate-200 bg-white px-6 py-4">
+    <footer className="mt-auto hidden border-t border-line bg-white px-6 py-4 lg:block">
       <div className="flex flex-col items-center justify-between gap-3 text-xs sm:flex-row">
         <div>
           <span className="font-semibold text-slate-600">© 2026 The State Farming Corporation of Kerala Ltd.</span>

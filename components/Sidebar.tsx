@@ -8,7 +8,7 @@ import {
 import { navFor, ROLES } from '@/lib/rbac';
 import { useSession } from '@/components/RoleProvider';
 
-const ICON_BY_HREF: Record<string, LucideIcon> = {
+export const ICON_BY_HREF: Record<string, LucideIcon> = {
   '/dashboard': LayoutDashboard,
   '/employees': Users,
   '/attendance': CalendarCheck,
@@ -30,7 +30,7 @@ export function Sidebar() {
 
   return (
     <aside
-      className="flex w-64 shrink-0 flex-col text-white"
+      className="hidden w-64 shrink-0 flex-col text-white lg:flex"
       style={{ background: 'linear-gradient(180deg, var(--canopy), var(--canopy-2))' }}
     >
       <div className="p-5">

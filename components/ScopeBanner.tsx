@@ -9,7 +9,7 @@ export function ScopeBanner() {
   if (!session) return null;
   const role = ROLES.find(r => r.id === session.role)!;
   return (
-    <header className="flex items-center justify-between border-b border-line bg-white px-6 py-3 shadow-card">
+    <header className="hidden items-center justify-between border-b border-line bg-white px-6 py-3 shadow-card lg:flex">
       <div className="text-sm">
         <span className="font-display font-semibold text-ink">{role.label}</span>
         <span className="text-muted"> · {role.scope}</span>
