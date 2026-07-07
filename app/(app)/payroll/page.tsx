@@ -4,6 +4,13 @@ import Link from 'next/link';
 import { useSession } from '@/components/RoleProvider';
 import { useScopedData } from '@/lib/client-fetch';
 import { StatCard } from '@/components/StatCard';
+import { Badge } from '@/components/Badge';
+
+const CATEGORY_TONE: Record<string, 'emerald' | 'amber' | 'slate'> = {
+  Permanent: 'emerald',
+  Casual: 'slate',
+  Dependent: 'amber',
+};
 
 type Line = {
   workerId: number;
@@ -125,7 +132,7 @@ export default function PayrollPage() {
               <tr key={l.workerId} className="border-t">
                 <td className="px-3 py-2">{l.checkRoll}</td>
                 <td className="px-3 py-2">{l.name}</td>
-                <td className="px-3 py-2">{l.category}</td>
+                <td className="px-3 py-2"><Badge tone={CATEGORY_TONE[l.category] ?? 'slate'}>{l.category}</Badge></td>
                 <td className="px-3 py-2">{l.blockClass}</td>
                 <td className="px-3 py-2">{l.producedKg.toFixed(2)}</td>
                 <td className="px-3 py-2">{(l.drcAvg * 100).toFixed(0)}%</td>

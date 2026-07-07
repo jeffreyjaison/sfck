@@ -4,6 +4,13 @@ import Link from 'next/link';
 import { useSession } from '@/components/RoleProvider';
 import { useScopedData } from '@/lib/client-fetch';
 import { RetirementAlerts } from '@/components/RetirementAlerts';
+import { Badge } from '@/components/Badge';
+
+const CATEGORY_TONE: Record<string, 'emerald' | 'amber' | 'slate'> = {
+  Permanent: 'emerald',
+  Casual: 'slate',
+  Dependent: 'amber',
+};
 
 type Worker = {
   id: number; checkRoll: string; name: string; category: string; type: string;
@@ -117,7 +124,7 @@ export default function EmployeesPage() {
                   </Link>
                 </td>
                 <td className="px-4 py-2">{w.name}</td>
-                <td className="px-4 py-2">{w.category}</td>
+                <td className="px-4 py-2"><Badge tone={CATEGORY_TONE[w.category] ?? 'slate'}>{w.category}</Badge></td>
                 <td className="px-4 py-2">{w.type}</td>
                 <td className="px-4 py-2">{w.gender}</td>
                 <td className="px-4 py-2">{w.age}</td>
