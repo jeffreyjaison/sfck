@@ -15,6 +15,9 @@ type ReplantingRow = {
   vacant: number;
   expenditure: number;
   yieldKg: number;
+  yieldStartYear: number;
+  producing: boolean;
+  status: string;
 };
 
 type Replanting = {
@@ -68,6 +71,7 @@ export default function ReplantingPage() {
               <th className="px-4 py-2 font-medium">Vacant</th>
               <th className="px-4 py-2 font-medium">Expenditure (₹)</th>
               <th className="px-4 py-2 font-medium">Yield (kg)</th>
+              <th className="px-4 py-2 font-medium">Status</th>
               <th className="px-4 py-2 font-medium">Estate</th>
             </tr>
           </thead>
@@ -82,6 +86,17 @@ export default function ReplantingPage() {
                 <td className="px-4 py-2">{r.vacant.toLocaleString()}</td>
                 <td className="px-4 py-2">{currency(r.expenditure)}</td>
                 <td className="px-4 py-2">{r.yieldKg.toLocaleString()}</td>
+                <td className="px-4 py-2">
+                  {r.producing ? (
+                    <span className="rounded-full bg-emerald-100 px-2 py-1 text-xs font-medium text-emerald-700">
+                      Producing
+                    </span>
+                  ) : (
+                    <span className="rounded-full bg-slate-100 px-2 py-1 text-xs font-medium text-slate-600">
+                      Immature — yields from {r.yieldStartYear}
+                    </span>
+                  )}
+                </td>
                 <td className="px-4 py-2">{r.estate}</td>
               </tr>
             ))}

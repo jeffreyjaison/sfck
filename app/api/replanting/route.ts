@@ -8,6 +8,8 @@ import { inArray } from 'drizzle-orm';
 export const dynamic = 'force-dynamic';
 
 const RUBBER_PRICE_PER_KG = 220;
+const DEMO_CURRENT_YEAR = 2026;
+const YEARS_TO_YIELD = 7;
 
 export async function GET(req: Request) {
   const session = sessionFromRequest(req);
@@ -25,18 +27,25 @@ export async function GET(req: Request) {
 
   const rs = await db.select().from(replanting).where(inArray(replanting.estateId, estateIds));
 
-  const rows = rs.map((r) => ({
-    id: r.id,
-    estate: estateName.get(r.estateId) ?? '',
-    blockCode: r.blockCode,
-    plantingYear: r.plantingYear,
-    areaHa: Number(r.areaHa),
-    surviving: r.surviving,
-    decayed: r.decayed,
-    vacant: r.vacant,
-    expenditure: Number(r.expenditure),
-    yieldKg: Number(r.yieldKg),
-  }));
+  const rows = rs.map((r) => {
+    const yieldStartYear = r.plantingYear + YEARS_TO_YIELD;
+    const producing = DEMO_CURRENT_YEAR >= yieldStartYear;
+    return {
+      id: r.id,
+      estate: estateName.get(r.estateId) ?? '',
+      blockCode: r.blockCode,
+      plantingYear: r.plantingYear,
+      areaHa: Number(r.areaHa),
+      surviving: r.surviving,
+      decayed: r.decayed,
+      vacant: r.vacant,
+      expenditure: Number(r.expenditure),
+      yieldKg: Number(r.yieldKg),
+      yieldStartYear,
+      producing,
+      status: producing ? 'Producing' : 'Immature',
+    };
+  });
 
   const census = rows.reduce(
     (acc, r) => ({

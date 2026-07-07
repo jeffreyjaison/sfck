@@ -82,7 +82,9 @@ async function main() {
       { estateId: est.id, blockCode: `${est.name}-RP14`, plantingYear: 2014, areaHa: '5.0',
         surviving: 1600, decayed: 80, vacant: 20, expenditure: '850000', yieldKg: '3200' },
       { estateId: est.id, blockCode: `${est.name}-RP18`, plantingYear: 2018, areaHa: '4.0',
-        surviving: 1400, decayed: 60, vacant: 40, expenditure: '620000', yieldKg: '0' },
+        surviving: 1400, decayed: 60, vacant: 40, expenditure: '620000', yieldKg: '1800' },
+      { estateId: est.id, blockCode: `${est.name}-RP21`, plantingYear: 2021, areaHa: '3.5',
+        surviving: 1300, decayed: 50, vacant: 30, expenditure: '480000', yieldKg: '0' },
     ]);
   }
 
