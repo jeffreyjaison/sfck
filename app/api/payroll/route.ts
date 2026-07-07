@@ -13,11 +13,6 @@ const PERIOD = { start: '2026-06-21', end: '2026-07-20' };
 const DAILY_WAGE = 400;
 const WEIGHTAGE = 500;
 const WASHING = 150;
-const CLASS_SPEC = {
-  II: { standardKg: 18, incentiveRate: 12 },
-  III: { standardKg: 15, incentiveRate: 10 },
-  IV: { standardKg: 12, incentiveRate: 8 },
-} as const;
 
 export async function GET(req: Request) {
   const session = sessionFromRequest(req);
@@ -26,6 +21,16 @@ export async function GET(req: Request) {
   const settingsMap = new Map(settingRows.map((s) => [s.key, s.value]));
   const workingDays = Number(settingsMap.get('working_days') ?? 26);
   const pfPercent = Number(settingsMap.get('pf_percent') ?? 12);
+
+  const num = (k: string, d: number) => {
+    const r = settingRows.find((s) => s.key === k);
+    return r ? Number(r.value) : d;
+  };
+  const CLASS_SPEC = {
+    II: { standardKg: num('block_II_target', 18), incentiveRate: num('block_II_rate', 12) },
+    III: { standardKg: num('block_III_target', 15), incentiveRate: num('block_III_rate', 10) },
+    IV: { standardKg: num('block_IV_target', 12), incentiveRate: num('block_IV_rate', 8) },
+  };
 
   const workers = await workersForSession(session);
   const tappers = workers.filter((w) => w.type === 'Tapper');

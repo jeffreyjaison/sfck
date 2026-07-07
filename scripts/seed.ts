@@ -93,6 +93,13 @@ async function main() {
     { key: 'working_days', value: '26', label: 'Approved Working Days / Month' },
     { key: 'medical_leave_cap', value: '14', label: 'Medical Leave Cap (days/yr)' },
     { key: 'pf_percent', value: '12', label: 'PF Percentage' },
+    { key: 'drc_default', value: '0.42', label: 'Default DRC' },
+    { key: 'block_II_target', value: '18', label: 'Block Class II — Standard kg/day' },
+    { key: 'block_II_rate', value: '12', label: 'Block Class II — Incentive Rate ₹/kg' },
+    { key: 'block_III_target', value: '15', label: 'Block Class III — Standard kg/day' },
+    { key: 'block_III_rate', value: '10', label: 'Block Class III — Incentive Rate ₹/kg' },
+    { key: 'block_IV_target', value: '12', label: 'Block Class IV — Standard kg/day' },
+    { key: 'block_IV_rate', value: '8', label: 'Block Class IV — Incentive Rate ₹/kg' },
   ]);
 
   // ---- Operational data: production collections (incl. prior-year) + attendance ----
