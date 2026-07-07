@@ -18,6 +18,10 @@ describe('medicalLeavePayable', () => {
     expect(medicalLeavePayable({ requestedDays: 5, takenThisYear: 0, dailyWage: 250 }))
       .toEqual({ paidDays: 5, amount: 833.33 });
   });
+  it('honors a custom cap when provided', () => {
+    expect(medicalLeavePayable({ requestedDays: 5, takenThisYear: 8, dailyWage: 300, cap: 10 }))
+      .toEqual({ paidDays: 2, amount: 400 });
+  });
 });
 
 describe('annualLeaveAccrued', () => {

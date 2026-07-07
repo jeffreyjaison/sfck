@@ -156,8 +156,12 @@ function CaptureForm({ workers, ccs, onSaved }: { workers: Worker[]; ccs: Cc[]; 
 }
 
 function RecentRow({ row, onDone }: { row: Recent; onDone: () => void }) {
+  const { session } = useSession();
   const [busy, setBusy] = useState(false);
+  const [approving, setApproving] = useState(false);
   const [sent, setSent] = useState(false);
+
+  const canApprove = session ? ['am', 'em', 'md'].includes(session.role) : false;
 
   const requestCorrection = async () => {
     setBusy(true);
@@ -172,6 +176,17 @@ function RecentRow({ row, onDone }: { row: Recent; onDone: () => void }) {
     setTimeout(() => setSent(false), 3000);
   };
 
+  const approveCorrection = async () => {
+    setApproving(true);
+    await fetch('/api/field', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'approveCorrection', collectionId: row.id }),
+    });
+    setApproving(false);
+    onDone();
+  };
+
   return (
     <tr className="border-t">
       <td className="px-4 py-2">{row.checkRoll} — {row.worker}</td>
@@ -181,23 +196,37 @@ function RecentRow({ row, onDone }: { row: Recent; onDone: () => void }) {
       <td className="px-4 py-2">{row.scrapKg.toFixed(2)}</td>
       <td className="px-4 py-2">{row.drc !== null ? `${(row.drc * 100).toFixed(0)}%` : '—'}</td>
       <td className="px-4 py-2">
-        {row.locked && (
+        {row.locked ? (
           <span className="inline-flex items-center gap-1 rounded-full bg-slate-100 px-2 py-0.5 text-xs text-slate-600">
             🔒 Locked
+          </span>
+        ) : (
+          <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2 py-0.5 text-xs text-emerald-700">
+            🔓 Editable
           </span>
         )}
       </td>
       <td className="px-4 py-2">
-        {sent ? (
-          <span className="text-xs text-emerald-600">Correction request sent to AM</span>
-        ) : (
-          <button
-            onClick={requestCorrection}
-            disabled={busy}
-            className="rounded-lg border px-2 py-1 text-xs text-slate-600 hover:bg-slate-50 disabled:opacity-50"
-          >
-            Request correction (AM approval)
-          </button>
+        {sent && <div className="mb-1 text-xs text-emerald-600">Correction request sent to AM</div>}
+        {row.locked && (
+          <div className="flex flex-wrap gap-2">
+            <button
+              onClick={requestCorrection}
+              disabled={busy}
+              className="rounded-lg border px-2 py-1 text-xs text-slate-600 hover:bg-slate-50 disabled:opacity-50"
+            >
+              Request correction (AM approval)
+            </button>
+            {canApprove && (
+              <button
+                onClick={approveCorrection}
+                disabled={approving}
+                className="rounded-lg border border-emerald-300 px-2 py-1 text-xs text-emerald-700 hover:bg-emerald-50 disabled:opacity-50"
+              >
+                Approve correction (AM)
+              </button>
+            )}
+          </div>
         )}
       </td>
     </tr>

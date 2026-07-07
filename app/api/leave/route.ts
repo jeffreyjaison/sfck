@@ -2,20 +2,23 @@ import { NextResponse } from 'next/server';
 import { sessionFromRequest } from '@/lib/api-session';
 import { workersForSession } from '@/lib/db/queries';
 import { db } from '@/lib/db/client';
-import { leaveRecords } from '@/lib/db/schema';
+import { leaveRecords, settings } from '@/lib/db/schema';
 import { inArray, and, eq } from 'drizzle-orm';
 import { medicalLeavePayable, annualLeaveAccrued, isLeaveEligible } from '@/lib/engine/leave';
 
 export const dynamic = 'force-dynamic';
 
 const DEMO_YEAR = 2026;
-const MEDICAL_CAP = 14;
 const DEMO_WORKING_DAYS = 240;
 
 export async function GET(req: Request) {
   const session = sessionFromRequest(req);
   const workers = await workersForSession(session);
   const ids = workers.map((w) => w.id);
+
+  const settingRows = await db.select().from(settings);
+  const settingsMap = new Map(settingRows.map((s) => [s.key, s.value]));
+  const medicalCap = Number(settingsMap.get('medical_leave_cap') ?? 14);
 
   const records = ids.length
     ? await db.select().from(leaveRecords).where(inArray(leaveRecords.workerId, ids))
@@ -42,7 +45,7 @@ export async function GET(req: Request) {
       eligible,
       annualBalance: accrued - (annualTaken.get(w.id) ?? 0),
       medicalTaken: medTaken,
-      medicalRemaining: Math.max(0, MEDICAL_CAP - medTaken),
+      medicalRemaining: Math.max(0, medicalCap - medTaken),
     };
   });
 
@@ -71,12 +74,16 @@ export async function POST(req: Request) {
   }
 
   if (kind === 'Medical') {
+    const settingRows = await db.select().from(settings);
+    const settingsMap = new Map(settingRows.map((s) => [s.key, s.value]));
+    const medicalCap = Number(settingsMap.get('medical_leave_cap') ?? 14);
+
     const existing = await db
       .select()
       .from(leaveRecords)
       .where(and(eq(leaveRecords.workerId, workerId), eq(leaveRecords.kind, 'Medical'), eq(leaveRecords.year, DEMO_YEAR)));
     const takenThisYear = existing.reduce((sum, r) => sum + r.days, 0);
-    const { paidDays, amount } = medicalLeavePayable({ requestedDays: days, takenThisYear, dailyWage });
+    const { paidDays, amount } = medicalLeavePayable({ requestedDays: days, takenThisYear, dailyWage, cap: medicalCap });
     await db.insert(leaveRecords).values({ workerId, kind: 'Medical', days: paidDays, year: DEMO_YEAR });
     return NextResponse.json({ ok: true, paidDays, amount });
   }

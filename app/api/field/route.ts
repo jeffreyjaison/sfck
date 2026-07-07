@@ -109,5 +109,28 @@ export async function POST(req: Request) {
     return NextResponse.json({ ok: true });
   }
 
+  if (action === 'approveCorrection') {
+    const collectionId = Number(body?.collectionId);
+    if (!collectionId) {
+      return NextResponse.json({ error: 'collectionId is required' }, { status: 400 });
+    }
+    const [collection] = await db.select().from(collections).where(eq(collections.id, collectionId));
+    if (!collection) {
+      return NextResponse.json({ error: 'Out of jurisdiction' }, { status: 403 });
+    }
+    const scopedWorkers = await workersForSession(session);
+    const inScope = new Set(scopedWorkers.map((w) => w.id));
+    if (!inScope.has(collection.workerId)) {
+      return NextResponse.json({ error: 'Out of jurisdiction' }, { status: 403 });
+    }
+    await db.update(collections).set({ locked: false }).where(eq(collections.id, collectionId));
+    await db.insert(auditLog).values({
+      actorRole: session.role,
+      action: 'correction-approved',
+      entity: `collection:${collectionId}`,
+    });
+    return NextResponse.json({ ok: true });
+  }
+
   return NextResponse.json({ error: 'Unknown action' }, { status: 400 });
 }
