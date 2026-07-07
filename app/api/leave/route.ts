@@ -59,6 +59,7 @@ export async function POST(req: Request) {
   const kind = body?.kind;
   const days = Number(body?.days);
   const dailyWage = Number(body?.dailyWage ?? 300);
+  const holidaysInPeriod = Number(body?.holidaysInPeriod ?? 0);
 
   if (!workerId || (kind !== 'Medical' && kind !== 'Annual') || !Number.isFinite(days) || days <= 0) {
     return NextResponse.json({ error: 'workerId, kind and a positive days value are required' }, { status: 400 });
@@ -83,7 +84,13 @@ export async function POST(req: Request) {
       .from(leaveRecords)
       .where(and(eq(leaveRecords.workerId, workerId), eq(leaveRecords.kind, 'Medical'), eq(leaveRecords.year, DEMO_YEAR)));
     const takenThisYear = existing.reduce((sum, r) => sum + r.days, 0);
-    const { paidDays, amount } = medicalLeavePayable({ requestedDays: days, takenThisYear, dailyWage, cap: medicalCap });
+    const { paidDays, amount } = medicalLeavePayable({
+      requestedDays: days,
+      takenThisYear,
+      dailyWage,
+      cap: medicalCap,
+      holidaysInPeriod,
+    });
     await db.insert(leaveRecords).values({ workerId, kind: 'Medical', days: paidDays, year: DEMO_YEAR });
     return NextResponse.json({ ok: true, paidDays, amount });
   }

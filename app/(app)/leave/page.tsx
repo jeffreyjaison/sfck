@@ -26,8 +26,10 @@ export default function LeavePage() {
   const [kind, setKind] = useState<'Medical' | 'Annual'>('Medical');
   const [days, setDays] = useState('');
   const [dailyWage, setDailyWage] = useState('300');
+  const [holidaysInPeriod, setHolidaysInPeriod] = useState('0');
   const [busy, setBusy] = useState(false);
   const [result, setResult] = useState<string | null>(null);
+  const [holidayNote, setHolidayNote] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   const selectedId = workerId || eligibleWorkers[0]?.id.toString() || '';
@@ -37,7 +39,9 @@ export default function LeavePage() {
     if (!selectedId || !Number.isFinite(n) || n <= 0) return;
     setBusy(true);
     setResult(null);
+    setHolidayNote(null);
     setError(null);
+    const holidays = Number(holidaysInPeriod) || 0;
     const res = await fetch('/api/leave', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -46,6 +50,7 @@ export default function LeavePage() {
         kind,
         days: n,
         dailyWage: Number(dailyWage) || 300,
+        ...(kind === 'Medical' ? { holidaysInPeriod: holidays } : {}),
       }),
     });
     const json = await res.json();
@@ -56,6 +61,9 @@ export default function LeavePage() {
     }
     if (kind === 'Medical') {
       setResult(`Paid ${json.paidDays} days · ₹${json.amount}`);
+      if (holidays > 0) {
+        setHolidayNote('Holidays auto-excluded — no double benefit.');
+      }
     } else {
       setResult('Annual leave recorded');
     }
@@ -77,7 +85,7 @@ export default function LeavePage() {
 
       <div className="rounded-xl border bg-white p-4">
         <h2 className="text-lg font-semibold">Record Leave</h2>
-        <div className="mt-4 grid gap-3 sm:grid-cols-5">
+        <div className="mt-4 grid gap-3 sm:grid-cols-3 lg:grid-cols-6">
           <select
             value={selectedId}
             onChange={(e) => setWorkerId(e.target.value)}
@@ -113,6 +121,16 @@ export default function LeavePage() {
               className="rounded-lg border px-3 py-2 text-sm"
             />
           )}
+          {kind === 'Medical' && (
+            <input
+              type="number"
+              min="0"
+              placeholder="Holidays in period"
+              value={holidaysInPeriod}
+              onChange={(e) => setHolidaysInPeriod(e.target.value)}
+              className="rounded-lg border px-3 py-2 text-sm"
+            />
+          )}
           <button
             onClick={submit}
             disabled={busy || !eligibleWorkers.length}
@@ -122,6 +140,7 @@ export default function LeavePage() {
           </button>
         </div>
         {result && <div className="mt-3 text-sm text-emerald-600">{result}</div>}
+        {holidayNote && <div className="mt-1 text-sm text-slate-500">{holidayNote}</div>}
         {error && <div className="mt-3 text-sm text-rose-600">{error}</div>}
       </div>
 

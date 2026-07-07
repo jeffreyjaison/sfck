@@ -22,6 +22,10 @@ describe('medicalLeavePayable', () => {
     expect(medicalLeavePayable({ requestedDays: 5, takenThisYear: 8, dailyWage: 300, cap: 10 }))
       .toEqual({ paidDays: 2, amount: 400 });
   });
+  it('excludes holidays falling within the medical leave period to avoid double benefit', () => {
+    expect(medicalLeavePayable({ requestedDays: 5, takenThisYear: 0, dailyWage: 300, holidaysInPeriod: 2 }))
+      .toEqual({ paidDays: 3, amount: 600 });
+  });
 });
 
 describe('annualLeaveAccrued', () => {

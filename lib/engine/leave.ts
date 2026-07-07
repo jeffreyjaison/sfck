@@ -4,13 +4,14 @@ import { round2 } from './money';
 const MEDICAL_CAP = 14;
 
 export function medicalLeavePayable(
-  { requestedDays, takenThisYear, dailyWage, cap = MEDICAL_CAP }:
-  { requestedDays: number; takenThisYear: number; dailyWage: number; cap?: number },
+  { requestedDays, takenThisYear, dailyWage, cap = MEDICAL_CAP, holidaysInPeriod = 0 }:
+  { requestedDays: number; takenThisYear: number; dailyWage: number; cap?: number; holidaysInPeriod?: number },
 ): { paidDays: number; amount: number } {
   const requested = Math.max(0, requestedDays);
   const taken = Math.max(0, takenThisYear);
   const remaining = Math.max(0, cap - taken);
-  const paidDays = Math.min(requested, remaining);
+  const cappedDays = Math.min(requested, remaining);
+  const paidDays = Math.max(0, cappedDays - Math.max(0, holidaysInPeriod));
   return { paidDays, amount: round2(paidDays * ((dailyWage * 2) / 3)) };
 }
 
