@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { blockIncentive, statutoryDeductions, netPay } from './wages';
+import { blockIncentive, statutoryDeductions, permanentAllowances, netPay } from './wages';
 
 describe('blockIncentive', () => {
   it('pays incentive only on kg above the block-class standard target', () => {
@@ -7,6 +7,24 @@ describe('blockIncentive', () => {
   });
   it('returns 0 when production is at or below the standard target', () => {
     expect(blockIncentive({ producedKg: 12, standardKg: 15, incentiveRate: 10 })).toBe(0);
+  });
+  it('returns 0 exactly at the target (producedKg === standardKg)', () => {
+    expect(blockIncentive({ producedKg: 15, standardKg: 15, incentiveRate: 10 })).toBe(0);
+  });
+});
+
+describe('permanentAllowances', () => {
+  it('passes weightage/washing through unchanged for Permanent', () => {
+    expect(permanentAllowances({ category: 'Permanent', weightage: 50, washing: 20 }))
+      .toEqual({ weightage: 50, washing: 20 });
+  });
+  it('zeroes both allowances for Casual', () => {
+    expect(permanentAllowances({ category: 'Casual', weightage: 50, washing: 20 }))
+      .toEqual({ weightage: 0, washing: 0 });
+  });
+  it('zeroes both allowances for Dependent', () => {
+    expect(permanentAllowances({ category: 'Dependent', weightage: 50, washing: 20 }))
+      .toEqual({ weightage: 0, washing: 0 });
   });
 });
 

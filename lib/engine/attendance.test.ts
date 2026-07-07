@@ -11,4 +11,10 @@ describe('tapperAttendanceOutcome', () => {
   it('rejects a tapper after 6:30', () => {
     expect(tapperAttendanceOutcome('06:45')).toBe('Rejected');
   });
+  it('approves exactly at the 6:15 boundary', () => {
+    expect(tapperAttendanceOutcome('06:15')).toBe('Approved');
+  });
+  it('marks pending exactly at the 6:30 boundary', () => {
+    expect(tapperAttendanceOutcome('06:30')).toBe('Pending');
+  });
 });

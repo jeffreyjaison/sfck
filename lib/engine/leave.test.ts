@@ -10,12 +10,20 @@ describe('medicalLeavePayable', () => {
     expect(medicalLeavePayable({ requestedDays: 5, takenThisYear: 12, dailyWage: 300 }))
       .toEqual({ paidDays: 2, amount: 400 });
   });
+  it('pays nothing once the 14-day cap is fully used', () => {
+    expect(medicalLeavePayable({ requestedDays: 5, takenThisYear: 14, dailyWage: 300 }))
+      .toEqual({ paidDays: 0, amount: 0 });
+  });
 });
 
 describe('annualLeaveAccrued', () => {
   it('accrues one day per 20 working days', () => {
     expect(annualLeaveAccrued(60)).toBe(3);
     expect(annualLeaveAccrued(59)).toBe(2);
+  });
+  it('accrues the first day exactly at 20 working days and none at 19', () => {
+    expect(annualLeaveAccrued(20)).toBe(1);
+    expect(annualLeaveAccrued(19)).toBe(0);
   });
 });
 
