@@ -33,6 +33,8 @@ const NAV_BY_ROLE: Record<RoleId, string[]> = {
   md: ['/dashboard', '/employees', '/attendance', '/payroll', '/leave', '/stock', '/replanting', '/reports'],
 };
 
+// NOTE: for role 'cc', scopeId identifies a collectionCentre id (id 1 = "CC Chi-11"),
+// whereas for fo/am/em, scopeId identifies an estate id. 'md' is unscoped (null).
 export const DEMO_SCOPE: Record<RoleId, number | null> = { cc: 1, fo: 1, am: 1, em: 1, md: null };
 
 export function navFor(role: RoleId): NavItem[] {

@@ -5,6 +5,14 @@ import type { Session } from '@/lib/rbac';
 
 export async function estatesForSession(session: Session) {
   if (session.role === 'md') return db.select().from(estates);
+  if (session.role === 'cc') {
+    if (!session.scopeId) return [];
+    const [cc] = await db.select().from(collectionCentres).where(eq(collectionCentres.id, session.scopeId));
+    if (!cc) return [];
+    const [div] = await db.select().from(divisions).where(eq(divisions.id, cc.divisionId));
+    if (!div) return [];
+    return db.select().from(estates).where(eq(estates.id, div.estateId));
+  }
   if (session.role === 'em' && session.scopeId) {
     const [est] = await db.select().from(estates).where(eq(estates.id, session.scopeId));
     if (!est) return [];
@@ -14,6 +22,10 @@ export async function estatesForSession(session: Session) {
 }
 
 export async function workersForSession(session: Session) {
+  if (session.role === 'cc') {
+    if (!session.scopeId) return [];
+    return db.select().from(workers).where(eq(workers.ccId, session.scopeId));
+  }
   const est = await estatesForSession(session);
   const ids = est.map((e) => e.id);
   if (!ids.length) return [];
@@ -21,6 +33,10 @@ export async function workersForSession(session: Session) {
 }
 
 export async function ccsForSession(session: Session) {
+  if (session.role === 'cc') {
+    if (!session.scopeId) return [];
+    return db.select().from(collectionCentres).where(eq(collectionCentres.id, session.scopeId));
+  }
   const est = await estatesForSession(session);
   const ids = est.map((e) => e.id);
   if (!ids.length) return [];
