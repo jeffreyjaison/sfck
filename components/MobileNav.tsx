@@ -40,6 +40,12 @@ export function MobileNav() {
     return () => window.removeEventListener('keydown', onKey);
   }, [open]);
 
+  // Close the drawer when the active role changes (the role switcher also navigates to /dashboard).
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- close the drawer on role switch
+    setOpen(false);
+  }, [session?.role]);
+
   if (!session) return null;
   const role = ROLES.find((r) => r.id === session.role);
   const initials = role ? role.label.split(' ').map((w) => w[0]).slice(0, 2).join('').toUpperCase() : '';
