@@ -86,11 +86,11 @@ export default function LeavePage() {
 
       <div className="rounded-2xl border border-line bg-white p-5 shadow-card">
         <h2 className="text-lg font-semibold text-ink">Record Leave</h2>
-        <div className="mt-4 grid gap-3 sm:grid-cols-3 lg:grid-cols-6">
+        <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-3 lg:grid-cols-6">
           <select
             value={selectedId}
             onChange={(e) => setWorkerId(e.target.value)}
-            className="rounded-lg border px-3 py-2 text-sm"
+            className="w-full rounded-lg border px-3 py-2 text-sm"
           >
             {eligibleWorkers.map((w) => (
               <option key={w.id} value={w.id}>{w.checkRoll} — {w.name}</option>
@@ -99,7 +99,7 @@ export default function LeavePage() {
           <select
             value={kind}
             onChange={(e) => setKind(e.target.value as 'Medical' | 'Annual')}
-            className="rounded-lg border px-3 py-2 text-sm"
+            className="w-full rounded-lg border px-3 py-2 text-sm"
           >
             <option value="Medical">Medical</option>
             <option value="Annual">Annual</option>
@@ -110,7 +110,7 @@ export default function LeavePage() {
             placeholder="Days"
             value={days}
             onChange={(e) => setDays(e.target.value)}
-            className="rounded-lg border px-3 py-2 text-sm"
+            className="w-full rounded-lg border px-3 py-2 text-sm"
           />
           {kind === 'Medical' && (
             <input
@@ -119,7 +119,7 @@ export default function LeavePage() {
               placeholder="Daily wage (default 300)"
               value={dailyWage}
               onChange={(e) => setDailyWage(e.target.value)}
-              className="rounded-lg border px-3 py-2 text-sm"
+              className="w-full rounded-lg border px-3 py-2 text-sm"
             />
           )}
           {kind === 'Medical' && (
@@ -129,13 +129,13 @@ export default function LeavePage() {
               placeholder="Holidays in period"
               value={holidaysInPeriod}
               onChange={(e) => setHolidaysInPeriod(e.target.value)}
-              className="rounded-lg border px-3 py-2 text-sm"
+              className="w-full rounded-lg border px-3 py-2 text-sm"
             />
           )}
           <button
             onClick={submit}
             disabled={busy || !eligibleWorkers.length}
-            className="rounded-lg bg-emerald-600 px-3 py-2 text-sm text-white hover:bg-emerald-700 disabled:opacity-50"
+            className="w-full rounded-lg bg-emerald-600 px-3 py-2 text-sm text-white hover:bg-emerald-700 disabled:opacity-50 sm:w-auto"
           >
             Submit
           </button>

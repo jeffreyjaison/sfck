@@ -56,12 +56,12 @@ export default function ReportsPage() {
         </p>
       </div>
 
-      <div className="flex flex-wrap gap-2">
+      <div className="grid grid-cols-2 gap-2 sm:flex sm:flex-wrap sm:gap-2">
         {DIMENSIONS.map((d) => (
           <button
             key={d.id}
             onClick={() => setGroupBy(d.id)}
-            className={`rounded-lg border px-3 py-1.5 text-sm font-medium ${
+            className={`w-full rounded-lg border px-3 py-1.5 text-sm font-medium sm:w-auto ${
               groupBy === d.id
                 ? 'border-emerald-600 bg-emerald-600 text-white'
                 : 'border-line bg-white text-muted hover:bg-slate-50'
@@ -76,7 +76,7 @@ export default function ReportsPage() {
         <div className="text-slate-400">Loading…</div>
       ) : (
         <>
-          <div className="grid items-stretch gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="grid grid-cols-2 items-stretch gap-3 sm:gap-4 lg:grid-cols-3">
             <StatCard label="Total Current (kg)" value={data.totals.current.toLocaleString()} />
             <StatCard label="Total Prior (kg)" value={data.totals.prior.toLocaleString()} />
             <StatCard

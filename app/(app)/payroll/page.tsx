@@ -101,7 +101,7 @@ export default function PayrollPage() {
         </p>
       </div>
 
-      <div className="grid items-stretch gap-4 sm:grid-cols-2 lg:grid-cols-3">
+      <div className="grid grid-cols-1 items-stretch gap-3 sm:gap-4 sm:grid-cols-3">
         <StatCard label="Tappers in scope" value={rows.length.toString()} />
         <StatCard label="Total Net Pay" value={`₹${totalNet.toLocaleString()}`} />
         <StatCard label="Working Days / PF %" value={`${data.workingDays} / ${data.pfPercent}%`} />

@@ -49,7 +49,7 @@ export default function ReplantingPage() {
         </p>
       </div>
 
-      <div className="grid items-stretch gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="grid grid-cols-2 items-stretch gap-3 sm:gap-4 lg:grid-cols-4">
         <StatCard label="Surviving Trees" value={data.census.surviving.toLocaleString()} />
         <StatCard label="Decayed" value={data.census.decayed.toLocaleString()} />
         <StatCard label="Vacant" value={data.census.vacant.toLocaleString()} />

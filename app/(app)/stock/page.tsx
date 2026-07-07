@@ -86,8 +86,8 @@ function RequisitionForm({ ccs, onDone }: { ccs: Cc[]; onDone: () => void }) {
   };
 
   return (
-    <div className="grid gap-3 sm:grid-cols-4">
-      <select value={ccId} onChange={(e) => setCcId(e.target.value)} className="rounded-lg border px-3 py-2 text-sm">
+    <div className="grid grid-cols-1 gap-3 sm:grid-cols-4">
+      <select value={ccId} onChange={(e) => setCcId(e.target.value)} className="w-full rounded-lg border px-3 py-2 text-sm">
         {ccs.map((c) => (
           <option key={c.id} value={c.id}>{c.name}</option>
         ))}
@@ -97,7 +97,7 @@ function RequisitionForm({ ccs, onDone }: { ccs: Cc[]; onDone: () => void }) {
         placeholder="Item"
         value={item}
         onChange={(e) => setItem(e.target.value)}
-        className="rounded-lg border px-3 py-2 text-sm"
+        className="w-full rounded-lg border px-3 py-2 text-sm"
       />
       <input
         type="number"
@@ -105,12 +105,12 @@ function RequisitionForm({ ccs, onDone }: { ccs: Cc[]; onDone: () => void }) {
         placeholder="Qty"
         value={qty}
         onChange={(e) => setQty(e.target.value)}
-        className="rounded-lg border px-3 py-2 text-sm"
+        className="w-full rounded-lg border px-3 py-2 text-sm"
       />
       <button
         onClick={submit}
         disabled={busy}
-        className="rounded-lg bg-emerald-600 px-3 py-2 text-sm text-white hover:bg-emerald-700 disabled:opacity-50"
+        className="w-full rounded-lg bg-emerald-600 px-3 py-2 text-sm text-white hover:bg-emerald-700 disabled:opacity-50 sm:w-auto"
       >
         Submit Requisition
       </button>
@@ -142,7 +142,7 @@ export default function StockPage() {
     <div className="space-y-6">
       <h1 className="text-2xl font-semibold text-ink">Stock &amp; Material</h1>
 
-      <div className="grid items-stretch gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="grid grid-cols-2 items-stretch gap-3 sm:gap-4 lg:grid-cols-4">
         <StatCard label="Latex Balance" value={totalFor('Latex').toLocaleString()} />
         <StatCard label="Scrap Balance" value={totalFor('Scrap').toLocaleString()} />
         <StatCard label="Ammonia Balance" value={totalFor('Ammonia').toLocaleString()} />

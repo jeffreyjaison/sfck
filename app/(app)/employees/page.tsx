@@ -65,32 +65,32 @@ export default function EmployeesPage() {
       <RetirementAlerts alerts={data.retirementAlerts} />
 
       <div className="rounded-2xl border border-line bg-white p-5 shadow-card">
-        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
+        <div className="grid grid-cols-2 gap-2 sm:flex sm:flex-wrap sm:items-center sm:gap-3">
           <input
             type="text"
             placeholder="Search name or check roll…"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="rounded-lg border px-3 py-2 text-sm"
+            className="col-span-2 w-full rounded-lg border px-3 py-2 text-sm sm:col-span-1 sm:w-auto sm:flex-1"
           />
-          <select value={gender} onChange={(e) => setGender(e.target.value)} className="rounded-lg border px-3 py-2 text-sm">
+          <select value={gender} onChange={(e) => setGender(e.target.value)} className="w-full rounded-lg border px-3 py-2 text-sm sm:w-auto">
             <option value="">All Genders</option>
             <option value="Male">Male</option>
             <option value="Female">Female</option>
           </select>
-          <select value={category} onChange={(e) => setCategory(e.target.value)} className="rounded-lg border px-3 py-2 text-sm">
+          <select value={category} onChange={(e) => setCategory(e.target.value)} className="w-full rounded-lg border px-3 py-2 text-sm sm:w-auto">
             <option value="">All Categories</option>
             <option value="Dependent">Dependent</option>
             <option value="Casual">Casual</option>
             <option value="Permanent">Permanent</option>
           </select>
-          <select value={estate} onChange={(e) => setEstate(e.target.value)} className="rounded-lg border px-3 py-2 text-sm">
+          <select value={estate} onChange={(e) => setEstate(e.target.value)} className="w-full rounded-lg border px-3 py-2 text-sm sm:w-auto">
             <option value="">All Estates</option>
             {data.estates.map((e) => (
               <option key={e.id} value={e.name}>{e.name}</option>
             ))}
           </select>
-          <select value={ageBucket} onChange={(e) => setAgeBucket(e.target.value)} className="rounded-lg border px-3 py-2 text-sm">
+          <select value={ageBucket} onChange={(e) => setAgeBucket(e.target.value)} className="w-full rounded-lg border px-3 py-2 text-sm sm:w-auto">
             <option value="">All Ages</option>
             {AGE_GROUPS.map((g) => (
               <option key={g} value={g}>{g}</option>

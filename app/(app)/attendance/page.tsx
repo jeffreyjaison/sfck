@@ -69,7 +69,7 @@ export default function AttendancePage() {
         approval and is paid as a separate voucher (excluded from PF, Bonus, Seniority).
       </div>
 
-      <div className="grid items-stretch gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="grid grid-cols-2 items-stretch gap-3 sm:gap-4 lg:grid-cols-4">
         <StatCard label="Approved" value={data.approvedCount.toString()} />
         <StatCard label="Pending" value={data.pendingCount.toString()} />
         <StatCard label="Rejected" value={data.rejectedCount.toString()} />
