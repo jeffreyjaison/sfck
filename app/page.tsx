@@ -1,9 +1,7 @@
 'use client';
 import { useRouter } from 'next/navigation';
-import { ROLES } from '@/lib/rbac';
+import { ROLES, DEMO_SCOPE } from '@/lib/rbac';
 import { useSession } from '@/components/RoleProvider';
-
-const DEMO_SCOPE: Record<string, number | null> = { cc: 1, fo: 1, am: 1, em: 1, md: null };
 
 export default function Login() {
   const router = useRouter();

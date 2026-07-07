@@ -33,6 +33,8 @@ const NAV_BY_ROLE: Record<RoleId, string[]> = {
   md: ['/dashboard', '/employees', '/attendance', '/payroll', '/leave', '/stock', '/replanting', '/reports'],
 };
 
+export const DEMO_SCOPE: Record<RoleId, number | null> = { cc: 1, fo: 1, am: 1, em: 1, md: null };
+
 export function navFor(role: RoleId): NavItem[] {
   const allowed = new Set(NAV_BY_ROLE[role]);
   return ALL_NAV.filter(n => allowed.has(n.href));
