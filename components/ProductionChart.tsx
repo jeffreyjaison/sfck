@@ -77,7 +77,8 @@ export function ProductionChart({ data }: { data: Row[] }) {
             tickLine={false}
             axisLine={false}
             tick={{ fill: 'var(--muted)' }}
-            width={48}
+            width={44}
+            tickFormatter={(v: number) => (v >= 1000 ? `${v / 1000}k` : String(v))}
           />
           <Tooltip cursor={{ fill: 'rgba(11,61,46,0.04)' }} content={<ChartTooltip />} />
           <Legend content={<ChartLegend />} />

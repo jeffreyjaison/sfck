@@ -99,7 +99,9 @@ export default function DashboardPage() {
   const { stats, dailySeries, avgDrc } = data;
   const restrictedCount = data.totalEstates - data.inScopeEstates;
   const trend = trendPct(dailySeries);
-  const workforceTotal = data.categoryMix.Permanent + data.categoryMix.Casual + data.categoryMix.Dependent;
+  const avgDailyLatex = Math.round(
+    dailySeries.reduce((a, b) => a + b, 0) / Math.max(1, dailySeries.length),
+  );
 
   const chips = [
     {
@@ -161,7 +163,12 @@ export default function DashboardPage() {
             label="Estates in Scope"
             value={`${data.inScopeEstates} of ${data.totalEstates}`}
           />,
-          <StatCard key="wf" label="Workforce" value={workforceTotal.toLocaleString()} />,
+          <StatCard
+            key="adl"
+            label="Avg daily latex"
+            value={`${avgDailyLatex.toLocaleString()} kg`}
+            series={dailySeries}
+          />,
         ].map((card, i) => (
           <div
             key={card.key}
