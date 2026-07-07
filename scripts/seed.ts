@@ -49,14 +49,24 @@ async function main() {
           { category: 'Dependent', type: 'General' },
           { category: 'Permanent', type: 'General' },
         ] as const;
+        const firstNames = ['Rajan', 'Suresh', 'Latha', 'Vijayan', 'Ambika', 'Ravi', 'Sunil', 'Geetha', 'Manoj', 'Bindu', 'Anil', 'Sreeja', 'Prakash', 'Reshma', 'Biju', 'Divya'];
+        const lastNames = ['Nair', 'Menon', 'Pillai', 'Kurup', 'Das'];
         for (const p of people) {
           checkSeq += 1;
+          // A few workers are within ~2 months of retirement (age 58) to demonstrate retirement alerts.
+          const nearRetire = checkSeq % 21 === 0;
+          const birthYear = nearRetire ? 1968 : 1972 + (checkSeq % 26); // 1972..1997
+          const birthMonth = nearRetire ? 8 : ((checkSeq % 12) + 1);
+          const dob = `${birthYear}-${String(birthMonth).padStart(2, '0')}-15`;
+          const joinYear = 2003 + (checkSeq % 18); // 2003..2020
+          const female = checkSeq % 2 === 0;
+          const name = `${firstNames[checkSeq % firstNames.length]} ${lastNames[checkSeq % lastNames.length]}`;
           await db.insert(s.workers).values({
             checkRoll: `SFCK-${checkSeq}`,
-            name: `Worker ${checkSeq}`,
+            name,
             category: p.category, type: p.type,
-            gender: checkSeq % 2 ? 'Male' : 'Female',
-            dob: '1975-05-10', dateOfJoining: '2010-06-01',
+            gender: female ? 'Female' : 'Male',
+            dob, dateOfJoining: `${joinYear}-06-01`,
             mobile: `98${checkSeq}00`, email: null, address: `${est.name}`,
             estateId: est.id, ccId: cc.id,
           });
