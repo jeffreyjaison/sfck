@@ -146,12 +146,18 @@ export default function PayrollPage() {
                   />
                 </td>
                 <td className="px-3 py-2 font-medium">₹{l.net.toLocaleString()}</td>
-                <td className="px-3 py-2">
+                <td className="px-3 py-2 space-x-1">
                   <Link
                     href={`/payroll/slip/${l.workerId}`}
                     className="rounded-lg bg-emerald-600 px-2 py-1 text-xs text-white hover:bg-emerald-700"
                   >
                     Slip
+                  </Link>
+                  <Link
+                    href={`/payroll/working-sheet/${l.workerId}`}
+                    className="rounded-lg bg-emerald-600 px-2 py-1 text-xs text-white hover:bg-emerald-700"
+                  >
+                    D4 Sheet
                   </Link>
                 </td>
               </tr>

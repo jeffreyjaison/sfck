@@ -47,22 +47,51 @@ export async function GET(req: Request) {
     colsByWorker.set(c.workerId, list);
   }
 
-  const blockClasses = ['II', 'III', 'IV'] as const;
+  // D4 tapping model: each tapper is assigned 4 blocks (positions A..D). Only one block
+  // is tapped per day, rotating through a 4-day cycle (block index = day-sequence % 4).
+  const D4_CLASSES = ['II', 'III', 'III', 'IV'] as const;
+  const D4_LABELS = ['A', 'B', 'C', 'D'] as const;
 
   const lines = tappers.map((worker) => {
-    const workerCols = colsByWorker.get(worker.id) ?? [];
+    const workerCols = (colsByWorker.get(worker.id) ?? [])
+      .slice()
+      .sort((a, b) => (a.day < b.day ? -1 : a.day > b.day ? 1 : 0));
     const tappingDays = workerCols.length;
-    const producedKg = round2(
-      workerCols.reduce((sum, c) => sum + Number(c.latexKg) * Number(c.drc ?? 0), 0),
-    );
     const drcAvg = workerCols.length
       ? round2(workerCols.reduce((sum, c) => sum + Number(c.drc ?? 0), 0) / workerCols.length)
       : 0;
 
-    const blockClassVal = blockClasses[worker.id % 3];
-    const spec = CLASS_SPEC[blockClassVal];
-    const standardTotal = spec.standardKg * tappingDays;
-    const incentive = blockIncentive({ producedKg, standardKg: standardTotal, incentiveRate: spec.incentiveRate });
+    // Assign each of the 4 blocks its class for this tapper, then attribute each
+    // collection day (sorted ascending) to block index k % 4 of the 4-day cycle.
+    const blockAgg = Array.from({ length: 4 }, (_, j) => {
+      const blockClassVal = D4_CLASSES[(worker.id + j) % 4];
+      return { produced: 0, daysTapped: 0, blockClass: blockClassVal };
+    });
+    workerCols.forEach((c, k) => {
+      const j = k % 4;
+      const dry = Number(c.latexKg) * Number(c.drc ?? 0);
+      blockAgg[j].produced += dry;
+      blockAgg[j].daysTapped += 1;
+    });
+
+    const d4Blocks = blockAgg.map((b, j) => {
+      const spec = CLASS_SPEC[b.blockClass];
+      const producedKg = round2(b.produced);
+      const standardKg = round2(spec.standardKg * b.daysTapped);
+      const incentive = blockIncentive({ producedKg, standardKg, incentiveRate: spec.incentiveRate });
+      return {
+        label: `Block ${D4_LABELS[j]}`,
+        blockClass: b.blockClass,
+        daysTapped: b.daysTapped,
+        producedKg,
+        standardKg,
+        incentive,
+      };
+    });
+
+    const producedKg = round2(d4Blocks.reduce((sum, b) => sum + b.producedKg, 0));
+    const incentive = round2(d4Blocks.reduce((sum, b) => sum + b.incentive, 0));
+    const blockClassSummary = d4Blocks.map((b) => b.blockClass).join('·');
 
     const gross = DAILY_WAGE * workingDays;
     const category = worker.category as Category;
@@ -76,7 +105,9 @@ export async function GET(req: Request) {
       checkRoll: worker.checkRoll,
       name: worker.name,
       category: worker.category,
-      blockClass: blockClassVal,
+      blockClass: blockClassSummary,
+      d4Blocks,
+      tappingDays,
       producedKg,
       drcAvg,
       gross,
