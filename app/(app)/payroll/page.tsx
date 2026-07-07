@@ -95,52 +95,52 @@ export default function PayrollPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-semibold">Payroll — D4 Wage Engine</h1>
-        <p className="mt-1 text-sm text-slate-500">
+        <h1 className="text-2xl font-semibold text-ink">Payroll — D4 Wage Engine</h1>
+        <p className="mt-1 text-sm text-muted">
           Wage period 21 Jun – 20 Jul · block class II/III/IV · CC-wise DRC · PF 12% (Permanent &amp; Casual) · Weightage/Washing (Permanent only)
         </p>
       </div>
 
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+      <div className="grid items-stretch gap-4 sm:grid-cols-2 lg:grid-cols-3">
         <StatCard label="Tappers in scope" value={rows.length.toString()} />
         <StatCard label="Total Net Pay" value={`₹${totalNet.toLocaleString()}`} />
         <StatCard label="Working Days / PF %" value={`${data.workingDays} / ${data.pfPercent}%`} />
       </div>
 
-      <div className="overflow-x-auto rounded-xl border bg-white">
+      <div className="overflow-x-auto rounded-2xl border border-line bg-white shadow-card">
         <table className="w-full whitespace-nowrap text-sm">
-          <thead className="bg-slate-50 text-left text-slate-500">
+          <thead className="text-left text-muted">
             <tr>
-              <th className="px-3 py-2 font-medium">Check Roll</th>
-              <th className="px-3 py-2 font-medium">Name</th>
-              <th className="px-3 py-2 font-medium">Category</th>
-              <th className="px-3 py-2 font-medium">Class</th>
-              <th className="px-3 py-2 font-medium">Produced kg</th>
-              <th className="px-3 py-2 font-medium">DRC</th>
-              <th className="px-3 py-2 font-medium">Gross</th>
-              <th className="px-3 py-2 font-medium">Incentive</th>
-              <th className="px-3 py-2 font-medium">Weightage</th>
-              <th className="px-3 py-2 font-medium">Washing</th>
-              <th className="px-3 py-2 font-medium">PF</th>
-              <th className="px-3 py-2 font-medium">Other Recovery</th>
-              <th className="px-3 py-2 font-medium">Net</th>
-              <th className="px-3 py-2 font-medium">Slip</th>
+              <th className="px-3 py-2 text-[11px] font-semibold uppercase tracking-wider">Check Roll</th>
+              <th className="px-3 py-2 text-[11px] font-semibold uppercase tracking-wider">Name</th>
+              <th className="px-3 py-2 text-[11px] font-semibold uppercase tracking-wider">Category</th>
+              <th className="px-3 py-2 text-[11px] font-semibold uppercase tracking-wider">Class</th>
+              <th className="px-3 py-2 text-[11px] font-semibold uppercase tracking-wider">Produced kg</th>
+              <th className="px-3 py-2 text-[11px] font-semibold uppercase tracking-wider">DRC</th>
+              <th className="px-3 py-2 text-[11px] font-semibold uppercase tracking-wider">Gross</th>
+              <th className="px-3 py-2 text-[11px] font-semibold uppercase tracking-wider">Incentive</th>
+              <th className="px-3 py-2 text-[11px] font-semibold uppercase tracking-wider">Weightage</th>
+              <th className="px-3 py-2 text-[11px] font-semibold uppercase tracking-wider">Washing</th>
+              <th className="px-3 py-2 text-[11px] font-semibold uppercase tracking-wider">PF</th>
+              <th className="px-3 py-2 text-[11px] font-semibold uppercase tracking-wider">Other Recovery</th>
+              <th className="px-3 py-2 text-[11px] font-semibold uppercase tracking-wider">Net</th>
+              <th className="px-3 py-2 text-[11px] font-semibold uppercase tracking-wider">Slip</th>
             </tr>
           </thead>
           <tbody>
             {rows.map((l) => (
-              <tr key={l.workerId} className="border-t">
-                <td className="px-3 py-2">{l.checkRoll}</td>
+              <tr key={l.workerId} className="border-t border-line">
+                <td className="px-3 py-2 mono">{l.checkRoll}</td>
                 <td className="px-3 py-2">{l.name}</td>
                 <td className="px-3 py-2"><Badge tone={CATEGORY_TONE[l.category] ?? 'slate'}>{l.category}</Badge></td>
                 <td className="px-3 py-2">{l.blockClass}</td>
-                <td className="px-3 py-2">{l.producedKg.toFixed(2)}</td>
-                <td className="px-3 py-2">{(l.drcAvg * 100).toFixed(0)}%</td>
-                <td className="px-3 py-2">₹{l.gross.toLocaleString()}</td>
-                <td className="px-3 py-2">₹{l.incentive.toLocaleString()}</td>
-                <td className="px-3 py-2">₹{l.weightage.toLocaleString()}</td>
-                <td className="px-3 py-2">₹{l.washing.toLocaleString()}</td>
-                <td className="px-3 py-2">
+                <td className="px-3 py-2 mono">{l.producedKg.toFixed(2)}</td>
+                <td className="px-3 py-2 mono">{(l.drcAvg * 100).toFixed(0)}%</td>
+                <td className="px-3 py-2 mono">₹{l.gross.toLocaleString()}</td>
+                <td className="px-3 py-2 mono">₹{l.incentive.toLocaleString()}</td>
+                <td className="px-3 py-2 mono">₹{l.weightage.toLocaleString()}</td>
+                <td className="px-3 py-2 mono">₹{l.washing.toLocaleString()}</td>
+                <td className="px-3 py-2 mono">
                   <span title="EPF — not editable">🔒 ₹{l.pf.toLocaleString()}</span>
                 </td>
                 <td className="px-3 py-2">
@@ -152,7 +152,7 @@ export default function PayrollPage() {
                     className="w-20 rounded-lg border px-2 py-1 text-sm"
                   />
                 </td>
-                <td className="px-3 py-2 font-medium">₹{l.net.toLocaleString()}</td>
+                <td className="px-3 py-2 mono font-medium">₹{l.net.toLocaleString()}</td>
                 <td className="px-3 py-2 space-x-1">
                   <Link
                     href={`/payroll/slip/${l.workerId}`}
@@ -171,7 +171,7 @@ export default function PayrollPage() {
             ))}
             {!rows.length && (
               <tr>
-                <td colSpan={14} className="px-4 py-4 text-center text-slate-400">No tappers in scope.</td>
+                <td colSpan={14} className="px-4 py-4 text-center text-muted">No tappers in scope.</td>
               </tr>
             )}
           </tbody>

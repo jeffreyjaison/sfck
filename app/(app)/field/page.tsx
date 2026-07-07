@@ -143,7 +143,7 @@ function CaptureForm({ workers, ccs, onSaved }: { workers: Worker[]; ccs: Cc[]; 
           className="mt-1 w-full rounded-lg border px-3 py-2 text-sm"
         />
       </div>
-      {error && <div className="text-xs text-rose-600">{error}</div>}
+      {error && <div className="text-xs text-[color:var(--clay)]">{error}</div>}
       <button
         onClick={submit}
         disabled={busy || !workers.length}
@@ -188,13 +188,13 @@ function RecentRow({ row, onDone }: { row: Recent; onDone: () => void }) {
   };
 
   return (
-    <tr className="border-t">
+    <tr className="border-t border-line">
       <td className="px-4 py-2">{row.checkRoll} — {row.worker}</td>
       <td className="px-4 py-2">{row.cc}</td>
       <td className="px-4 py-2">{row.day}</td>
-      <td className="px-4 py-2">{row.latexKg.toFixed(2)}</td>
-      <td className="px-4 py-2">{row.scrapKg.toFixed(2)}</td>
-      <td className="px-4 py-2">{row.drc !== null ? `${(row.drc * 100).toFixed(0)}%` : '—'}</td>
+      <td className="px-4 py-2 mono">{row.latexKg.toFixed(2)}</td>
+      <td className="px-4 py-2 mono">{row.scrapKg.toFixed(2)}</td>
+      <td className="px-4 py-2 mono">{row.drc !== null ? `${(row.drc * 100).toFixed(0)}%` : '—'}</td>
       <td className="px-4 py-2">
         {row.locked ? (
           <span className="inline-flex items-center gap-1 rounded-full bg-slate-100 px-2 py-0.5 text-xs text-slate-600">
@@ -243,8 +243,8 @@ export default function FieldPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-semibold">Field Data Capture</h1>
-        <p className="mt-1 text-sm text-slate-500">
+        <h1 className="text-2xl font-semibold text-ink">Field Data Capture</h1>
+        <p className="mt-1 text-sm text-muted">
           Daily latex &amp; scrap entry · handheld app · offline-first · data locked after entry.
         </p>
       </div>
@@ -277,22 +277,22 @@ export default function FieldPage() {
       </div>
 
       <div>
-        <h2 className="text-lg font-semibold">Recent entries (locked)</h2>
-        <p className="mt-1 text-xs text-slate-500">
+        <h2 className="text-lg font-semibold text-ink">Recent entries (locked)</h2>
+        <p className="mt-1 text-xs text-muted">
           Entries are locked after capture; corrections require AM-authorised approval.
         </p>
-        <div className="mt-3 overflow-x-auto rounded-xl border bg-white">
+        <div className="mt-3 overflow-x-auto rounded-2xl border border-line bg-white shadow-card">
           <table className="w-full text-sm">
-            <thead className="bg-slate-50 text-left text-slate-500">
+            <thead className="text-left text-muted">
               <tr>
-                <th className="px-4 py-2 font-medium">Worker</th>
-                <th className="px-4 py-2 font-medium">CC</th>
-                <th className="px-4 py-2 font-medium">Day</th>
-                <th className="px-4 py-2 font-medium">Latex (kg)</th>
-                <th className="px-4 py-2 font-medium">Scrap (kg)</th>
-                <th className="px-4 py-2 font-medium">DRC</th>
-                <th className="px-4 py-2 font-medium">Status</th>
-                <th className="px-4 py-2 font-medium">Action</th>
+                <th className="px-4 py-2 text-[11px] font-semibold uppercase tracking-wider">Worker</th>
+                <th className="px-4 py-2 text-[11px] font-semibold uppercase tracking-wider">CC</th>
+                <th className="px-4 py-2 text-[11px] font-semibold uppercase tracking-wider">Day</th>
+                <th className="px-4 py-2 text-[11px] font-semibold uppercase tracking-wider">Latex (kg)</th>
+                <th className="px-4 py-2 text-[11px] font-semibold uppercase tracking-wider">Scrap (kg)</th>
+                <th className="px-4 py-2 text-[11px] font-semibold uppercase tracking-wider">DRC</th>
+                <th className="px-4 py-2 text-[11px] font-semibold uppercase tracking-wider">Status</th>
+                <th className="px-4 py-2 text-[11px] font-semibold uppercase tracking-wider">Action</th>
               </tr>
             </thead>
             <tbody>
@@ -301,7 +301,7 @@ export default function FieldPage() {
               ))}
               {!data.recent.length && (
                 <tr>
-                  <td colSpan={8} className="px-4 py-4 text-center text-slate-400">No entries yet.</td>
+                  <td colSpan={8} className="px-4 py-4 text-center text-muted">No entries yet.</td>
                 </tr>
               )}
             </tbody>

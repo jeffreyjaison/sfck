@@ -22,7 +22,7 @@ export default function EmployeeDetailPage() {
     return (
       <div className="space-y-4">
         <Link href="/employees" className="text-sm text-emerald-600 hover:underline">&larr; Back to Employees</Link>
-        <div className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">
+        <div className="rounded-lg bg-orange-50 p-4 text-sm text-[color:var(--clay)]">
           Employee not found or outside your access scope.
         </div>
       </div>
@@ -44,19 +44,19 @@ export default function EmployeeDetailPage() {
     <div className="space-y-6">
       <Link href="/employees" className="text-sm text-emerald-600 hover:underline">&larr; Back to Employees</Link>
 
-      <div className="rounded-xl border border-emerald-200 bg-emerald-50 p-6">
-        <div className="text-xs uppercase tracking-wide text-emerald-700">Check Roll Number</div>
-        <div className="mt-1 text-3xl font-bold text-emerald-900">{data.checkRoll}</div>
+      <div className="rounded-2xl border border-emerald-200 bg-emerald-50 p-6 shadow-card">
+        <div className="text-[11px] font-semibold uppercase tracking-wider text-emerald-700">Check Roll Number</div>
+        <div className="mono mt-1 text-3xl font-bold text-emerald-900">{data.checkRoll}</div>
         <div className="mt-1 text-xs text-emerald-700">Unique · Permanent · Non-reusable</div>
       </div>
 
-      <div className="rounded-xl border bg-white p-6">
-        <h2 className="mb-4 text-lg font-semibold">{data.name}</h2>
+      <div className="rounded-2xl border border-line bg-white p-6 shadow-card">
+        <h2 className="mb-4 text-lg font-semibold text-ink">{data.name}</h2>
         <dl className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {fields.map((f) => (
             <div key={f.label}>
-              <dt className="text-xs uppercase tracking-wide text-slate-400">{f.label}</dt>
-              <dd className="mt-0.5 text-sm text-slate-800">{f.value}</dd>
+              <dt className="text-[11px] font-semibold uppercase tracking-wider text-muted">{f.label}</dt>
+              <dd className="mt-0.5 text-sm text-ink">{f.value}</dd>
             </div>
           ))}
         </dl>

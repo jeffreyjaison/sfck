@@ -38,7 +38,7 @@ export default function PayslipPage() {
     return (
       <div className="space-y-4">
         <Link href="/payroll" className="text-sm text-emerald-600 hover:underline">&larr; Back to Payroll</Link>
-        <div className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">
+        <div className="rounded-lg bg-orange-50 p-4 text-sm text-[color:var(--clay)]">
           Slip unavailable (worker not a tapper or outside your access scope).
         </div>
       </div>

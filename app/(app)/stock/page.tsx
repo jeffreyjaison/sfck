@@ -3,6 +3,13 @@ import { useState } from 'react';
 import { useSession } from '@/components/RoleProvider';
 import { useScopedData } from '@/lib/client-fetch';
 import { StatCard } from '@/components/StatCard';
+import { Badge } from '@/components/Badge';
+
+const REQ_TONE: Record<string, 'emerald' | 'amber' | 'rose' | 'slate'> = {
+  Approved: 'emerald',
+  Pending: 'amber',
+  Rejected: 'rose',
+};
 
 type StockItem = { id: number; estate: string; name: string; unit: string; balance: number };
 type Cc = { id: number; name: string };
@@ -52,7 +59,7 @@ function TransferControl({ item, onDone }: { item: StockItem; onDone: () => void
           Dispatch to factory
         </button>
       </div>
-      <span className="text-[11px] text-slate-400">recorded as factory dispatch</span>
+      <span className="text-[11px] text-muted">recorded as factory dispatch</span>
     </div>
   );
 }
@@ -133,9 +140,9 @@ export default function StockPage() {
 
   return (
     <div className="space-y-6">
-      <h1 className="text-2xl font-semibold">Stock &amp; Material</h1>
+      <h1 className="text-2xl font-semibold text-ink">Stock &amp; Material</h1>
 
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="grid items-stretch gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <StatCard label="Latex Balance" value={totalFor('Latex').toLocaleString()} />
         <StatCard label="Scrap Balance" value={totalFor('Scrap').toLocaleString()} />
         <StatCard label="Ammonia Balance" value={totalFor('Ammonia').toLocaleString()} />
@@ -146,23 +153,23 @@ export default function StockPage() {
         />
       </div>
 
-      <div className="overflow-x-auto rounded-xl border bg-white">
+      <div className="overflow-x-auto rounded-2xl border border-line bg-white shadow-card">
         <table className="w-full text-sm">
-          <thead className="bg-slate-50 text-left text-slate-500">
+          <thead className="text-left text-muted">
             <tr>
-              <th className="px-4 py-2 font-medium">Item</th>
-              <th className="px-4 py-2 font-medium">Unit</th>
-              <th className="px-4 py-2 font-medium">Balance</th>
-              <th className="px-4 py-2 font-medium">Estate</th>
-              <th className="px-4 py-2 font-medium">Action</th>
+              <th className="px-4 py-2 text-[11px] font-semibold uppercase tracking-wider">Item</th>
+              <th className="px-4 py-2 text-[11px] font-semibold uppercase tracking-wider">Unit</th>
+              <th className="px-4 py-2 text-[11px] font-semibold uppercase tracking-wider">Balance</th>
+              <th className="px-4 py-2 text-[11px] font-semibold uppercase tracking-wider">Estate</th>
+              <th className="px-4 py-2 text-[11px] font-semibold uppercase tracking-wider">Action</th>
             </tr>
           </thead>
           <tbody>
             {data.items.map((i) => (
-              <tr key={i.id} className="border-t">
+              <tr key={i.id} className="border-t border-line">
                 <td className="px-4 py-2">{i.name}</td>
                 <td className="px-4 py-2">{i.unit}</td>
-                <td className="px-4 py-2">{i.balance.toLocaleString()}</td>
+                <td className="px-4 py-2 mono">{i.balance.toLocaleString()}</td>
                 <td className="px-4 py-2">{i.estate}</td>
                 <td className="px-4 py-2">
                   <TransferControl item={i} onDone={reload} />
@@ -173,32 +180,32 @@ export default function StockPage() {
         </table>
       </div>
 
-      <div className="rounded-xl border bg-white p-4">
-        <h2 className="text-lg font-semibold">Requisitions</h2>
-        <p className="mt-1 text-xs text-slate-500">Online requisition → AM review, approval &amp; issue.</p>
+      <div className="rounded-2xl border border-line bg-white p-5 shadow-card">
+        <h2 className="text-lg font-semibold text-ink">Requisitions</h2>
+        <p className="mt-1 text-xs text-muted">Online requisition → AM review, approval &amp; issue.</p>
         <div className="mt-4">
           <RequisitionForm ccs={data.ccs} onDone={reload} />
         </div>
       </div>
 
-      <div className="overflow-x-auto rounded-xl border bg-white">
+      <div className="overflow-x-auto rounded-2xl border border-line bg-white shadow-card">
         <table className="w-full text-sm">
-          <thead className="bg-slate-50 text-left text-slate-500">
+          <thead className="text-left text-muted">
             <tr>
-              <th className="px-4 py-2 font-medium">Collection Centre</th>
-              <th className="px-4 py-2 font-medium">Item</th>
-              <th className="px-4 py-2 font-medium">Qty</th>
-              <th className="px-4 py-2 font-medium">Status</th>
-              <th className="px-4 py-2 font-medium">Action</th>
+              <th className="px-4 py-2 text-[11px] font-semibold uppercase tracking-wider">Collection Centre</th>
+              <th className="px-4 py-2 text-[11px] font-semibold uppercase tracking-wider">Item</th>
+              <th className="px-4 py-2 text-[11px] font-semibold uppercase tracking-wider">Qty</th>
+              <th className="px-4 py-2 text-[11px] font-semibold uppercase tracking-wider">Status</th>
+              <th className="px-4 py-2 text-[11px] font-semibold uppercase tracking-wider">Action</th>
             </tr>
           </thead>
           <tbody>
             {data.requisitions.map((r) => (
-              <tr key={r.id} className="border-t">
+              <tr key={r.id} className="border-t border-line">
                 <td className="px-4 py-2">{r.cc}</td>
                 <td className="px-4 py-2">{r.item}</td>
-                <td className="px-4 py-2">{r.qty}</td>
-                <td className="px-4 py-2">{r.status}</td>
+                <td className="px-4 py-2 mono">{r.qty}</td>
+                <td className="px-4 py-2"><Badge tone={REQ_TONE[r.status] ?? 'slate'}>{r.status}</Badge></td>
                 <td className="px-4 py-2">
                   {r.status === 'Pending' ? (
                     <div className="flex gap-2">
@@ -212,20 +219,20 @@ export default function StockPage() {
                       <button
                         onClick={() => setReqStatus(r.id, 'Rejected')}
                         disabled={statusBusy === r.id}
-                        className="rounded-lg bg-rose-600 px-2 py-1 text-xs text-white hover:bg-rose-700 disabled:opacity-50"
+                        className="rounded-lg bg-[color:var(--clay)] px-2 py-1 text-xs text-white hover:opacity-90 disabled:opacity-50"
                       >
                         Reject
                       </button>
                     </div>
                   ) : (
-                    <span className="text-slate-400">—</span>
+                    <span className="text-muted">—</span>
                   )}
                 </td>
               </tr>
             ))}
             {!data.requisitions.length && (
               <tr>
-                <td colSpan={5} className="px-4 py-4 text-center text-slate-400">No requisitions yet.</td>
+                <td colSpan={5} className="px-4 py-4 text-center text-muted">No requisitions yet.</td>
               </tr>
             )}
           </tbody>

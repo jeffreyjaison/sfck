@@ -34,7 +34,7 @@ const STATUTORY_DOCS: { label: string; slug: string }[] = [
 
 function VarianceText({ value }: { value: number }) {
   return (
-    <span className={value >= 0 ? 'text-emerald-600' : 'text-rose-600'}>
+    <span className={`mono ${value >= 0 ? 'text-emerald-600' : 'text-[color:var(--clay)]'}`}>
       {value >= 0 ? '+' : ''}
       {value}%
     </span>
@@ -50,8 +50,8 @@ export default function ReportsPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-semibold">Reports &amp; MIS</h1>
-        <p className="mt-1 text-sm text-slate-500">
+        <h1 className="text-2xl font-semibold text-ink">Reports &amp; MIS</h1>
+        <p className="mt-1 text-sm text-muted">
           Consolidated dry-rubber production · comparative against the corresponding prior-year period.
         </p>
       </div>
@@ -64,7 +64,7 @@ export default function ReportsPage() {
             className={`rounded-lg border px-3 py-1.5 text-sm font-medium ${
               groupBy === d.id
                 ? 'border-emerald-600 bg-emerald-600 text-white'
-                : 'border-slate-200 bg-white text-slate-600 hover:bg-slate-50'
+                : 'border-line bg-white text-muted hover:bg-slate-50'
             }`}
           >
             {d.label}
@@ -76,7 +76,7 @@ export default function ReportsPage() {
         <div className="text-slate-400">Loading…</div>
       ) : (
         <>
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="grid items-stretch gap-4 sm:grid-cols-2 lg:grid-cols-3">
             <StatCard label="Total Current (kg)" value={data.totals.current.toLocaleString()} />
             <StatCard label="Total Prior (kg)" value={data.totals.prior.toLocaleString()} />
             <StatCard
@@ -86,37 +86,37 @@ export default function ReportsPage() {
             />
           </div>
 
-          <div className="overflow-x-auto rounded-xl border bg-white">
+          <div className="overflow-x-auto rounded-2xl border border-line bg-white shadow-card">
             <table className="w-full text-sm">
-              <thead className="bg-slate-50 text-left text-slate-500">
+              <thead className="text-left text-muted">
                 <tr>
-                  <th className="px-4 py-2 font-medium">{dimension.column}</th>
-                  <th className="px-4 py-2 font-medium">Current Year (kg)</th>
-                  <th className="px-4 py-2 font-medium">Prior Year (kg)</th>
-                  <th className="px-4 py-2 font-medium">Variance %</th>
+                  <th className="px-4 py-2 text-[11px] font-semibold uppercase tracking-wider">{dimension.column}</th>
+                  <th className="px-4 py-2 text-[11px] font-semibold uppercase tracking-wider">Current Year (kg)</th>
+                  <th className="px-4 py-2 text-[11px] font-semibold uppercase tracking-wider">Prior Year (kg)</th>
+                  <th className="px-4 py-2 text-[11px] font-semibold uppercase tracking-wider">Variance %</th>
                 </tr>
               </thead>
               <tbody>
                 {data.rows.map((r) => (
-                  <tr key={r.label} className="border-t">
+                  <tr key={r.label} className="border-t border-line">
                     <td className="px-4 py-2">{r.label}</td>
-                    <td className="px-4 py-2">{r.current.toLocaleString()}</td>
-                    <td className="px-4 py-2">{r.prior.toLocaleString()}</td>
+                    <td className="px-4 py-2 mono">{r.current.toLocaleString()}</td>
+                    <td className="px-4 py-2 mono">{r.prior.toLocaleString()}</td>
                     <td className="px-4 py-2 font-medium"><VarianceText value={r.variancePct} /></td>
                   </tr>
                 ))}
                 {!data.rows.length && (
                   <tr>
-                    <td colSpan={4} className="px-4 py-4 text-center text-slate-400">No data in scope.</td>
+                    <td colSpan={4} className="px-4 py-4 text-center text-muted">No data in scope.</td>
                   </tr>
                 )}
               </tbody>
               {data.rows.length > 0 && (
                 <tfoot>
-                  <tr className="border-t bg-slate-50 font-semibold">
+                  <tr className="border-t border-line bg-latex/60 font-semibold">
                     <td className="px-4 py-2">Total</td>
-                    <td className="px-4 py-2">{data.totals.current.toLocaleString()}</td>
-                    <td className="px-4 py-2">{data.totals.prior.toLocaleString()}</td>
+                    <td className="px-4 py-2 mono">{data.totals.current.toLocaleString()}</td>
+                    <td className="px-4 py-2 mono">{data.totals.prior.toLocaleString()}</td>
                     <td className="px-4 py-2"><VarianceText value={data.totals.variancePct} /></td>
                   </tr>
                 </tfoot>
@@ -127,14 +127,14 @@ export default function ReportsPage() {
       )}
 
       <div>
-        <h2 className="text-lg font-semibold">Statutory Documents</h2>
-        <p className="mt-1 text-sm text-slate-500">Estate register &amp; statutory report formats.</p>
+        <h2 className="text-lg font-semibold text-ink">Statutory Documents</h2>
+        <p className="mt-1 text-sm text-muted">Estate register &amp; statutory report formats.</p>
         <div className="mt-3 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
           {STATUTORY_DOCS.map((doc) => (
             <Link
               key={doc.slug}
               href={`/reports/${doc.slug}`}
-              className="rounded-xl border bg-white px-4 py-3 text-sm font-medium text-slate-700 shadow-sm hover:border-emerald-300 hover:bg-emerald-50 hover:text-emerald-700"
+              className="rounded-2xl border border-line bg-white px-4 py-3 text-sm font-medium text-ink shadow-card transition-shadow hover:border-emerald-300 hover:bg-emerald-50 hover:text-emerald-700 hover:shadow-card-hover"
             >
               {doc.label}
             </Link>

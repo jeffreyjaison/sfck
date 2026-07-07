@@ -80,7 +80,7 @@ function PaymentSlipDoc() {
   const line = data.lines[0];
   if (!line) {
     return (
-      <div className="rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-700">
+      <div className="rounded-lg bg-orange-50 p-4 text-sm text-[color:var(--clay)]">
         No payroll lines available in your scope to preview a payment slip.
       </div>
     );
@@ -105,7 +105,7 @@ function WeightSlipDoc() {
   const recent = data.recent[0];
   if (!recent) {
     return (
-      <div className="rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-700">
+      <div className="rounded-lg bg-orange-50 p-4 text-sm text-[color:var(--clay)]">
         No recent field collections available in your scope to preview a weight slip.
       </div>
     );
@@ -140,7 +140,7 @@ function GenericDoc({ doc }: { doc: string }) {
 
   if (data.error) {
     return (
-      <div className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">
+      <div className="rounded-lg bg-orange-50 p-4 text-sm text-[color:var(--clay)]">
         Unknown document type.
       </div>
     );
@@ -163,7 +163,7 @@ export default function DocumentPage() {
   return (
     <div className="space-y-4">
       <BackLink />
-      <h1 className="text-2xl font-semibold">{label}</h1>
+      <h1 className="text-2xl font-semibold text-ink">{label}</h1>
 
       {doc === 'payment-slip' ? (
         <PaymentSlipDoc />

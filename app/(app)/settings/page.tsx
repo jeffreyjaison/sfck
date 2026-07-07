@@ -23,10 +23,10 @@ function SettingRow({ setting, onSaved }: { setting: Setting; onSaved: () => voi
   };
 
   return (
-    <div className="flex flex-col gap-2 border-t px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
+    <div className="flex flex-col gap-2 border-t border-line px-4 py-3 first:border-t-0 sm:flex-row sm:items-center sm:justify-between">
       <div>
-        <div className="text-sm font-medium text-slate-700">{setting.label}</div>
-        <div className="text-xs text-slate-400">{setting.key}</div>
+        <div className="text-sm font-medium text-ink">{setting.label}</div>
+        <div className="text-xs text-muted">{setting.key}</div>
       </div>
       <div className="flex items-center gap-2">
         <input
@@ -57,19 +57,19 @@ export default function SettingsPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-semibold">Settings / Configuration</h1>
-        <p className="mt-1 text-sm text-slate-500">
+        <h1 className="text-2xl font-semibold text-ink">Settings / Configuration</h1>
+        <p className="mt-1 text-sm text-muted">
           Business parameters — editable without code changes.
         </p>
       </div>
 
-      <div className="overflow-hidden rounded-xl border bg-white">
+      <div className="overflow-hidden rounded-2xl border border-line bg-white shadow-card">
         {data.settings.map((s) => (
           <SettingRow key={s.key} setting={s} onSaved={reload} />
         ))}
       </div>
 
-      <p className="text-xs text-slate-500">
+      <p className="text-xs text-muted">
         Changes here drive retirement alerts, payroll working days, PF %, and leave caps.
       </p>
     </div>

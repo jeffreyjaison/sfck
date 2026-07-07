@@ -60,11 +60,11 @@ export default function EmployeesPage() {
 
   return (
     <div className="space-y-6">
-      <h1 className="text-2xl font-semibold">Employee Master &amp; Check Roll</h1>
+      <h1 className="text-2xl font-semibold text-ink">Employee Master &amp; Check Roll</h1>
 
       <RetirementAlerts alerts={data.retirementAlerts} />
 
-      <div className="rounded-xl border bg-white p-4">
+      <div className="rounded-2xl border border-line bg-white p-5 shadow-card">
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
           <input
             type="text"
@@ -97,29 +97,29 @@ export default function EmployeesPage() {
             ))}
           </select>
         </div>
-        <div className="mt-3 text-xs text-slate-500">
+        <div className="mt-3 text-xs text-muted">
           Showing {filtered.length} of {data.workers.length}
         </div>
       </div>
 
-      <div className="overflow-x-auto rounded-xl border bg-white">
+      <div className="overflow-x-auto rounded-2xl border border-line bg-white shadow-card">
         <table className="w-full text-sm">
-          <thead className="bg-slate-50 text-left text-slate-500">
+          <thead className="text-left text-muted">
             <tr>
-              <th className="px-4 py-2 font-medium">Check Roll</th>
-              <th className="px-4 py-2 font-medium">Name</th>
-              <th className="px-4 py-2 font-medium">Category</th>
-              <th className="px-4 py-2 font-medium">Type</th>
-              <th className="px-4 py-2 font-medium">Gender</th>
-              <th className="px-4 py-2 font-medium">Age</th>
-              <th className="px-4 py-2 font-medium">Estate</th>
+              <th className="px-4 py-2 text-[11px] font-semibold uppercase tracking-wider">Check Roll</th>
+              <th className="px-4 py-2 text-[11px] font-semibold uppercase tracking-wider">Name</th>
+              <th className="px-4 py-2 text-[11px] font-semibold uppercase tracking-wider">Category</th>
+              <th className="px-4 py-2 text-[11px] font-semibold uppercase tracking-wider">Type</th>
+              <th className="px-4 py-2 text-[11px] font-semibold uppercase tracking-wider">Gender</th>
+              <th className="px-4 py-2 text-[11px] font-semibold uppercase tracking-wider">Age</th>
+              <th className="px-4 py-2 text-[11px] font-semibold uppercase tracking-wider">Estate</th>
             </tr>
           </thead>
           <tbody>
             {filtered.map((w) => (
-              <tr key={w.id} className="border-t">
+              <tr key={w.id} className="border-t border-line">
                 <td className="px-4 py-2">
-                  <Link href={`/employees/${w.id}`} className="text-emerald-600 hover:text-emerald-700 hover:underline">
+                  <Link href={`/employees/${w.id}`} className="mono text-emerald-600 hover:text-emerald-700 hover:underline">
                     {w.checkRoll}
                   </Link>
                 </td>
@@ -127,7 +127,7 @@ export default function EmployeesPage() {
                 <td className="px-4 py-2"><Badge tone={CATEGORY_TONE[w.category] ?? 'slate'}>{w.category}</Badge></td>
                 <td className="px-4 py-2">{w.type}</td>
                 <td className="px-4 py-2">{w.gender}</td>
-                <td className="px-4 py-2">{w.age}</td>
+                <td className="px-4 py-2 tnum">{w.age}</td>
                 <td className="px-4 py-2">{w.estate}</td>
               </tr>
             ))}
