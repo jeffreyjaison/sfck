@@ -18,12 +18,10 @@ import {
   Sprout,
   ChartColumn,
   ShieldCheck,
-  WifiOff,
-  MessageSquare,
-  Database,
-  Layers,
   FileText,
   Languages,
+  Sparkles,
+  MousePointerClick,
   type LucideIcon,
 } from 'lucide-react';
 
@@ -140,28 +138,6 @@ const DOCUMENTS: { name: string; malayalam?: boolean }[] = [
   { name: 'Weight Slip' },
 ];
 
-const STACK: { icon: LucideIcon; label: string; sub: string }[] = [
-  { icon: Layers, label: 'Next.js 16', sub: 'App Router · React 19' },
-  { icon: Database, label: 'PostgreSQL / Neon', sub: 'Serverless Postgres' },
-  { icon: Database, label: 'Drizzle ORM', sub: 'Typed schema & queries' },
-  { icon: ChartColumn, label: 'Recharts', sub: 'Interactive data viz' },
-];
-
-const SWATCHES: { name: string; varName: string }[] = [
-  { name: 'canopy', varName: 'var(--canopy)' },
-  { name: 'emerald', varName: 'var(--emerald)' },
-  { name: 'leaf', varName: 'var(--leaf)' },
-  { name: 'latex', varName: 'var(--latex)' },
-  { name: 'clay', varName: 'var(--clay)' },
-];
-
-const TYPE_FACES = [
-  'Bricolage Grotesque — display',
-  'Inter — body',
-  'JetBrains Mono — figures',
-  'Noto Sans Malayalam — payslips',
-];
-
 /* ------------------------------------------------------------------ */
 /* Small presentational helpers                                        */
 /* ------------------------------------------------------------------ */
@@ -192,6 +168,18 @@ function LogoMark() {
       aria-hidden="true"
     >
       <Leaf className="h-5 w-5" strokeWidth={2} />
+    </span>
+  );
+}
+
+function FeatureTag({ children, tone = 'emerald' }: { children: React.ReactNode; tone?: 'emerald' | 'clay' }) {
+  const cls =
+    tone === 'clay'
+      ? 'bg-orange-50 text-[color:var(--clay)] ring-[color:var(--clay)]/20'
+      : 'bg-emerald-50 text-emerald-brand ring-emerald-brand/20';
+  return (
+    <span className={`inline-flex w-fit items-center gap-1.5 rounded-full px-2.5 py-1 text-[11px] font-bold uppercase tracking-wider ring-1 ${cls}`}>
+      {children}
     </span>
   );
 }
@@ -395,30 +383,57 @@ export default function Landing() {
           </div>
         </section>
 
-        {/* 6 — Interactive features ---------------------------------- */}
-        <section id="features" className="scroll-mt-20 bg-white py-16 sm:py-20">
+        {/* 6 — Interactive features (emphasised centrepiece) --------- */}
+        <section
+          id="features"
+          className="relative scroll-mt-20 border-y border-emerald-brand/15 py-16 sm:py-24"
+          style={{ background: 'radial-gradient(130% 90% at 50% 0%, #e7f6ee 0%, var(--paper) 55%)' }}
+        >
           <div className="mx-auto w-full max-w-6xl px-4 sm:px-6">
-            <SectionHeading
-              eyebrow="Live, interactive widgets"
-              title="The real dashboard, on the landing page"
-              lead="Every chart below is the exact component that powers the estate console — fed with demo data."
-            />
+            {/* Emphasised heading */}
+            <div className="mx-auto max-w-3xl text-center">
+              <span className="inline-flex items-center gap-2 rounded-full bg-emerald-brand/10 px-3.5 py-1.5 text-[11px] font-bold uppercase tracking-wider text-emerald-brand ring-1 ring-emerald-brand/20">
+                <Sparkles className="h-3.5 w-3.5" /> The interactive core
+              </span>
+              <h2 className="mt-4 font-display text-3xl font-bold leading-[1.08] text-ink sm:text-4xl xl:text-5xl">
+                Not screenshots — the live console, right here.
+              </h2>
+              <p className="mx-auto mt-4 max-w-xl text-base text-muted sm:text-lg">
+                Every chart, gauge and table below is the{' '}
+                <span className="font-semibold text-ink">exact React component</span> that runs the estate
+                console — rendering real demo data as you scroll.
+              </p>
+              <div className="mt-6 flex flex-wrap items-center justify-center gap-2.5">
+                {[
+                  { icon: ChartColumn, label: 'Real production data' },
+                  { icon: MousePointerClick, label: 'Interactive & live' },
+                  { icon: ShieldCheck, label: 'Locked audit trail' },
+                ].map((c) => (
+                  <span
+                    key={c.label}
+                    className="inline-flex items-center gap-1.5 rounded-full border border-line bg-white px-3 py-1.5 text-xs font-semibold text-ink shadow-card"
+                  >
+                    <c.icon className="h-3.5 w-3.5 text-emerald-brand" strokeWidth={2} /> {c.label}
+                  </span>
+                ))}
+              </div>
+            </div>
 
             {/* Row A: comparative chart (2/3) + gauge (1/3) */}
-            <div className="mt-10 grid items-stretch gap-4 lg:grid-cols-3">
+            <div className="mt-12 grid items-stretch gap-4 lg:grid-cols-3">
               <div className="h-full animate-rise lg:col-span-2">
                 <figure className="flex h-full flex-col">
+                  <div className="mb-3"><FeatureTag>Year-on-year comparative MIS</FeatureTag></div>
                   <ProductionChart data={BY_ESTATE} />
                   <figcaption className="mt-3 text-sm text-muted">
-                    <span className="font-semibold text-ink">Year-on-year comparative MIS</span> — current vs prior
-                    season production, estate by estate.
+                    Current vs prior season production, estate by estate.
                   </figcaption>
                 </figure>
               </div>
               <div className="h-full animate-rise" style={{ '--rise-delay': '90ms' } as React.CSSProperties}>
                 <div className="flex h-full flex-col rounded-2xl border border-line bg-white p-5 shadow-card">
-                  <h3 className="text-lg font-semibold text-ink">CC-wise DRC consolidation</h3>
-                  <p className="mt-1 text-sm text-muted">Average dry rubber content across all collection centres.</p>
+                  <FeatureTag>CC-wise DRC consolidation</FeatureTag>
+                  <p className="mt-2 text-sm text-muted">Average dry rubber content across all collection centres.</p>
                   <div className="mt-auto flex items-center justify-center pt-4">
                     <RadialGauge value={AVG_DRC} max={100} label="Avg DRC" unit="%" />
                   </div>
@@ -430,8 +445,8 @@ export default function Landing() {
             <div className="mt-4 grid items-stretch gap-4 lg:grid-cols-3">
               <div className="h-full animate-rise">
                 <div className="flex h-full flex-col rounded-2xl border border-line bg-white p-5 shadow-card">
-                  <h3 className="text-lg font-semibold text-ink">Workforce mix</h3>
-                  <p className="mt-1 text-sm text-muted">Worker classification across the corporation.</p>
+                  <FeatureTag>Workforce classification</FeatureTag>
+                  <p className="mt-2 text-sm text-muted">Permanent, Casual & Dependent split across the corporation.</p>
                   <div className="mt-auto flex flex-1 items-center justify-center pt-4">
                     <Donut segments={categoryMix(WORKFORCE)} />
                   </div>
@@ -439,19 +454,19 @@ export default function Landing() {
               </div>
 
               <div className="h-full animate-rise" style={{ '--rise-delay': '90ms' } as React.CSSProperties}>
-                <div className="flex h-full flex-col">
-                  <StatCard label="Daily production trend" value="1,397 kg" delta="+33.8% 14-day" tone="up" series={DAILY} />
+                <div className="flex h-full flex-col gap-3">
+                  <FeatureTag>Live sparkline KPI</FeatureTag>
+                  <div className="flex-1">
+                    <StatCard label="Daily production trend" value="1,397 kg" delta="+33.8% 14-day" tone="up" series={DAILY} />
+                  </div>
                 </div>
               </div>
 
               <div className="h-full animate-rise" style={{ '--rise-delay': '180ms' } as React.CSSProperties}>
                 <div className="flex h-full flex-col rounded-2xl border border-line bg-white p-5 shadow-card">
-                  <div className="mb-3 flex items-center gap-2">
-                    <ShieldCheck className="h-4.5 w-4.5 text-emerald-brand" />
-                    <h3 className="text-lg font-semibold text-ink">Audit trail — data integrity</h3>
-                  </div>
-                  <p className="mb-4 text-sm text-muted">Locked data with a full, immutable audit log.</p>
-                  <div className="mt-auto">
+                  <FeatureTag tone="clay">Audit trail — data integrity</FeatureTag>
+                  <p className="mt-2 text-sm text-muted">Locked data with a full, immutable audit log.</p>
+                  <div className="mt-auto pt-2">
                     <Timeline items={TIMELINE} />
                   </div>
                 </div>
@@ -544,83 +559,7 @@ export default function Landing() {
           </div>
         </section>
 
-        {/* 9 — Design & tech spec ------------------------------------ */}
-        <section className="mx-auto w-full max-w-6xl px-4 py-16 sm:px-6 sm:py-20">
-          <SectionHeading eyebrow="Design & engineering" title="Built like a product, not a prototype" />
-
-          <div className="mt-10 grid items-stretch gap-4 lg:grid-cols-3">
-            {/* Stack */}
-            <div className="flex h-full flex-col rounded-2xl border border-line bg-white p-5 shadow-card">
-              <h3 className="text-lg font-semibold text-ink">Stack</h3>
-              <ul className="mt-4 space-y-3">
-                {STACK.map((s) => (
-                  <li key={s.label} className="flex items-center gap-3">
-                    <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-latex text-emerald-brand">
-                      <s.icon className="h-4.5 w-4.5" strokeWidth={1.75} />
-                    </span>
-                    <div>
-                      <div className="text-sm font-semibold text-ink">{s.label}</div>
-                      <div className="text-xs text-muted">{s.sub}</div>
-                    </div>
-                  </li>
-                ))}
-              </ul>
-            </div>
-
-            {/* Tokens + type */}
-            <div className="flex h-full flex-col rounded-2xl border border-line bg-white p-5 shadow-card">
-              <h3 className="text-lg font-semibold text-ink">Design tokens</h3>
-              <div className="mt-4 flex flex-wrap gap-3">
-                {SWATCHES.map((sw) => (
-                  <div key={sw.name} className="flex flex-col items-center gap-1.5">
-                    <span
-                      className="h-10 w-10 rounded-xl border border-line shadow-card"
-                      style={{ background: sw.varName }}
-                      aria-hidden="true"
-                    />
-                    <span className="text-[11px] font-medium text-muted">{sw.name}</span>
-                  </div>
-                ))}
-              </div>
-              <div className="mt-5 border-t border-line pt-4">
-                <div className="text-[11px] font-semibold uppercase tracking-wider text-muted">Typography</div>
-                <ul className="mt-2 space-y-1.5">
-                  {TYPE_FACES.map((t) => (
-                    <li key={t} className="text-sm text-ink/80">{t}</li>
-                  ))}
-                </ul>
-              </div>
-            </div>
-
-            {/* Headline facts */}
-            <div
-              className="flex h-full flex-col justify-center rounded-2xl border border-line p-5 text-white shadow-card"
-              style={{ background: 'linear-gradient(160deg, var(--canopy), var(--canopy-2))' }}
-            >
-              <h3 className="font-display text-lg font-bold">By the numbers</h3>
-              <dl className="mt-4 grid grid-cols-2 gap-4">
-                {[
-                  { k: 'Roles', v: '5' },
-                  { k: 'Modules', v: '8' },
-                  { k: 'Requirements', v: '23' },
-                  { k: 'Documents', v: '10' },
-                ].map((f) => (
-                  <div key={f.k}>
-                    <dd className="mono text-3xl font-bold text-leaf">{f.v}</dd>
-                    <dt className="mt-0.5 text-xs text-white/70">{f.k}</dt>
-                  </div>
-                ))}
-              </dl>
-              <div className="mt-5 flex flex-wrap gap-2 border-t border-white/15 pt-4 text-xs text-white/70">
-                <span className="inline-flex items-center gap-1.5"><WifiOff className="h-3.5 w-3.5 text-leaf" /> Offline-first</span>
-                <span className="inline-flex items-center gap-1.5"><MessageSquare className="h-3.5 w-3.5 text-leaf" /> SMS slips</span>
-                <span className="inline-flex items-center gap-1.5"><Languages className="h-3.5 w-3.5 text-leaf" /> Malayalam</span>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* 10 — Final CTA + footer ----------------------------------- */}
+        {/* 9 — Final CTA + footer ------------------------------------ */}
         <section
           className="relative overflow-hidden text-white"
           style={{ background: 'linear-gradient(160deg, var(--canopy), var(--canopy-2))' }}
