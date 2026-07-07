@@ -114,20 +114,26 @@ async function main() {
     '2025-06-30', '2025-07-01', '2025-07-02', '2025-07-03', '2025-07-04', '2025-07-05', '2025-07-06',
   ];
   const drcFor = (i: number) => (0.40 + ((i % 6) * 0.01)).toFixed(2);
+  // Per-day production factors shared across all tappers so the aggregate daily series
+  // has a realistic shape (monsoon dips + a gentle upward trend) instead of a flat line.
+  const curFactor   = [0.86, 0.90, 0.95, 0.74, 0.80, 0.93, 1.00, 0.96, 1.02, 1.08, 0.88, 1.05, 1.12, 1.15];
+  const priorFactor = [0.72, 0.75, 0.80, 0.68, 0.74, 0.82, 0.88, 0.84, 0.86, 0.90, 0.78, 0.88, 0.92, 0.95];
 
   const collectionRows: (typeof s.collections.$inferInsert)[] = [];
   tappers.forEach((w, i) => {
     daysCurrent.forEach((day, di) => {
       collectionRows.push({
         workerId: w.id, ccId: w.ccId!, day,
-        latexKg: String(48 + ((i + di) % 24)), scrapKg: String(4 + ((i + di) % 5)),
+        latexKg: String(Math.round((48 + ((i + di) % 24)) * curFactor[di])),
+        scrapKg: String(4 + ((i + di) % 5)),
         drc: drcFor(i + di), locked: true, slipSentSms: true,
       });
     });
     daysPrior.forEach((day, di) => {
       collectionRows.push({
         workerId: w.id, ccId: w.ccId!, day,
-        latexKg: String(38 + ((i + di) % 20)), scrapKg: String(3 + ((i + di) % 4)),
+        latexKg: String(Math.round((38 + ((i + di) % 20)) * priorFactor[di])),
+        scrapKg: String(3 + ((i + di) % 4)),
         drc: drcFor(i + di), locked: true, slipSentSms: true,
       });
     });
