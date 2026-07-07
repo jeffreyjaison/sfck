@@ -10,7 +10,7 @@ import { MobileNav } from '@/components/MobileNav';
 export default function AppLayout({ children }: { children: React.ReactNode }) {
   const { session, hydrated } = useSession();
   const router = useRouter();
-  useEffect(() => { if (hydrated && !session) router.replace('/'); }, [hydrated, session, router]);
+  useEffect(() => { if (hydrated && !session) router.replace('/login'); }, [hydrated, session, router]);
   if (!hydrated || !session) return null;
   return (
     <div className="flex min-h-screen">

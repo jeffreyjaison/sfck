@@ -1,144 +1,668 @@
 'use client';
-import { useRouter } from 'next/navigation';
+
+import { useState } from 'react';
+import Link from 'next/link';
 import {
-  Warehouse,
-  ClipboardList,
-  Building2,
-  Users,
-  Landmark,
-  Sprout,
-  Wallet,
-  ShieldCheck,
   Leaf,
+  ArrowRight,
+  Rocket,
+  Smartphone,
+  Building2,
+  Landmark,
+  Users,
+  MapPin,
+  CalendarCheck,
+  CalendarDays,
+  Wallet,
+  Package,
+  Sprout,
+  ChartColumn,
+  ShieldCheck,
+  WifiOff,
+  MessageSquare,
+  Database,
+  Layers,
+  FileText,
+  Languages,
   type LucideIcon,
 } from 'lucide-react';
-import { ROLES, DEMO_SCOPE, type RoleId } from '@/lib/rbac';
-import { useSession } from '@/components/RoleProvider';
 
-const ROLE_ICONS: Record<RoleId, LucideIcon> = {
-  cc: Warehouse,
-  fo: ClipboardList,
-  am: Building2,
-  em: Users,
-  md: Landmark,
-};
+import { ProductionPulse } from '@/components/ProductionPulse';
+import { ProductionChart } from '@/components/ProductionChart';
+import { RadialGauge } from '@/components/RadialGauge';
+import { Donut } from '@/components/Donut';
+import { StatCard } from '@/components/StatCard';
+import { Timeline } from '@/components/Timeline';
+import { categoryMix } from '@/lib/widgets/mix';
+import { ROLES, type RoleId } from '@/lib/rbac';
 
-const HIGHLIGHTS: { icon: LucideIcon; text: string }[] = [
-  { icon: Sprout, text: '4 rubber estates, 16 collection centres' },
-  { icon: Wallet, text: 'D4 wage engine & Malayalam payslips' },
-  { icon: ShieldCheck, text: 'Role-based, jurisdiction-bound access' },
+/* ------------------------------------------------------------------ */
+/* Static demo data                                                    */
+/* ------------------------------------------------------------------ */
+
+const LATEX_TOTAL = 38378;
+const UNIT = 'kg';
+const YOY = 45.7;
+const AVG_DRC = 42.5;
+
+const DAILY = [1044, 1094, 1156, 899, 972, 1130, 1215, 1167, 1236, 1312, 1070, 1277, 1361, 1397];
+
+const WORKFORCE = { Permanent: 32, Casual: 16, Dependent: 16 };
+
+const BY_ESTATE = [
+  { estate: 'Chithalvetty', current: 9703, prior: 6660 },
+  { estate: 'Kumaramkudy', current: 9486, prior: 7010 },
+  { estate: 'Mullumala', current: 9703, prior: 6980 },
+  { estate: 'Cheruppittakkavu', current: 9486, prior: 6640 },
 ];
 
-export default function Login() {
-  const router = useRouter();
-  const { setSession } = useSession();
+const TIMELINE: { title: string; meta: string; time: string; tone: 'emerald' | 'clay' }[] = [
+  { title: 'factory-dispatch', meta: 'Assistant Manager · stock:1 qty:150', time: '08 Jul, 01:13', tone: 'emerald' },
+  { title: 'correction-approved', meta: 'Assistant Manager · collection:57', time: '08 Jul, 01:13', tone: 'emerald' },
+  { title: 'excess-voucher-created', meta: 'Estate Manager · attendance:24', time: '08 Jul, 01:13', tone: 'clay' },
+  { title: 'attendance-approved', meta: 'Assistant Manager · attendance:12', time: '08 Jul, 01:13', tone: 'emerald' },
+];
+
+const NAV_LINKS = [
+  { href: '#overview', label: 'Overview' },
+  { href: '#portals', label: 'Portals' },
+  { href: '#modules', label: 'Modules' },
+  { href: '#features', label: 'Features' },
+  { href: '#roles', label: 'Roles' },
+  { href: '#docs', label: 'Docs' },
+];
+
+const PORTALS: { icon: LucideIcon; title: string; who: string; specs: string[] }[] = [
+  {
+    icon: Smartphone,
+    title: 'Field Data App',
+    who: 'Collection Workers & Supervisors',
+    specs: [
+      'Daily attendance at the collection centre',
+      'Latex & scrap weight capture with DRC',
+      'SMS weight slips to workers',
+      'Offline-first capture with background sync',
+    ],
+  },
+  {
+    icon: Building2,
+    title: 'Estate Operations',
+    who: 'AM · EM · FO',
+    specs: [
+      'Division & collection-centre management',
+      'Attendance and correction approvals',
+      'Wage processing & stock transfers',
+      'Estate-level production reporting',
+    ],
+  },
+  {
+    icon: Landmark,
+    title: 'Head Office Console',
+    who: 'MD · GM',
+    specs: [
+      'Consolidated production across estates',
+      'Corporation-wide payroll oversight',
+      'Comparative MIS & performance ranking',
+      'Statutory document generation',
+    ],
+  },
+];
+
+const MODULES: { id: string; icon: LucideIcon; title: string; desc: string }[] = [
+  { id: 'M1', icon: Users, title: 'Employee Master & Check Roll', desc: 'Worker records, PF/ESI, and the daily check-roll register.' },
+  { id: 'M2', icon: CalendarCheck, title: 'Attendance', desc: 'Muster capture, corrections, approvals and overtime.' },
+  { id: 'M3', icon: Smartphone, title: 'Field Capture', desc: 'Latex & scrap weights and DRC readings from the field.' },
+  { id: 'M4', icon: Wallet, title: 'Payroll — D4 Wage Engine', desc: 'D4 wage computation, deductions and Malayalam payslips.' },
+  { id: 'M5', icon: CalendarDays, title: 'Leave & Weightage', desc: 'Leave balances, weightage and eligibility rules.' },
+  { id: 'M6', icon: Package, title: 'Stock & Material', desc: 'Latex stock, dispatch vouchers and material transfers.' },
+  { id: 'M7', icon: Sprout, title: 'Replanting', desc: 'Block-wise replanting schedules and progress tracking.' },
+  { id: 'M8', icon: ChartColumn, title: 'Reports & MIS', desc: 'Consolidated production, payroll and comparative MIS.' },
+];
+
+const ROLE_ACCESS: Record<RoleId, string> = {
+  cc: 'Field capture and attendance for the single collection centre they are assigned to — nothing beyond it.',
+  fo: 'Attendance, employees and reports for the divisions they supervise within their estate.',
+  am: 'The whole estate: approvals for attendance, corrections, wages and stock across every division and CC.',
+  em: 'Their estate group — payroll, leave, stock and reporting consolidated across the estates they manage.',
+  md: 'Corporation-wide visibility: every estate, all payroll and the full comparative MIS. Unrestricted, read-across.',
+};
+
+const DOCUMENTS: { name: string; malayalam?: boolean }[] = [
+  { name: 'Daily Production Statement' },
+  { name: 'Pocket Check Roll' },
+  { name: 'Muster Chit' },
+  { name: 'Payment Slip (Malayalam)', malayalam: true },
+  { name: 'Crop Book Part 1' },
+  { name: 'Crop Book Part 2' },
+  { name: 'Production Performance of Estates' },
+  { name: 'Final DRC Values' },
+  { name: 'Daily Target & Achievement' },
+  { name: 'Weight Slip' },
+];
+
+const STACK: { icon: LucideIcon; label: string; sub: string }[] = [
+  { icon: Layers, label: 'Next.js 16', sub: 'App Router · React 19' },
+  { icon: Database, label: 'PostgreSQL / Neon', sub: 'Serverless Postgres' },
+  { icon: Database, label: 'Drizzle ORM', sub: 'Typed schema & queries' },
+  { icon: ChartColumn, label: 'Recharts', sub: 'Interactive data viz' },
+];
+
+const SWATCHES: { name: string; varName: string }[] = [
+  { name: 'canopy', varName: 'var(--canopy)' },
+  { name: 'emerald', varName: 'var(--emerald)' },
+  { name: 'leaf', varName: 'var(--leaf)' },
+  { name: 'latex', varName: 'var(--latex)' },
+  { name: 'clay', varName: 'var(--clay)' },
+];
+
+const TYPE_FACES = [
+  'Bricolage Grotesque — display',
+  'Inter — body',
+  'JetBrains Mono — figures',
+  'Noto Sans Malayalam — payslips',
+];
+
+/* ------------------------------------------------------------------ */
+/* Small presentational helpers                                        */
+/* ------------------------------------------------------------------ */
+
+function SectionHeading({
+  eyebrow,
+  title,
+  lead,
+}: {
+  eyebrow: string;
+  title: string;
+  lead?: string;
+}) {
   return (
-    <main className="flex min-h-screen flex-col lg:flex-row">
-      {/* Brand panel */}
-      <aside
-        className="relative isolate flex flex-col justify-between overflow-hidden px-8 py-8 text-white lg:w-[42%] lg:px-14 lg:py-14"
-        style={{ background: 'linear-gradient(160deg, var(--canopy), var(--canopy-2))' }}
-      >
-        {/* Decorative watermark */}
-        <Sprout
-          aria-hidden
-          className="pointer-events-none absolute -bottom-16 -right-12 h-72 w-72 text-leaf/[0.07] lg:h-[26rem] lg:w-[26rem]"
-          strokeWidth={1}
-        />
-        {/* Soft radial glow */}
-        <div
-          aria-hidden
-          className="pointer-events-none absolute -left-24 -top-24 h-96 w-96 rounded-full opacity-40 blur-3xl"
-          style={{ background: 'radial-gradient(circle, rgba(52,211,153,0.25), transparent 70%)' }}
-        />
+    <div className="mx-auto max-w-2xl text-center">
+      <div className="text-[11px] font-semibold uppercase tracking-wider text-emerald-brand">{eyebrow}</div>
+      <h2 className="mt-2 font-display text-2xl font-bold text-ink sm:text-3xl">{title}</h2>
+      {lead && <p className="mt-3 text-sm text-muted sm:text-base">{lead}</p>}
+    </div>
+  );
+}
 
-        {/* Top: logo + wordmark */}
-        <div className="relative z-10 flex items-center gap-4 lg:flex-col lg:items-start lg:gap-5">
-          <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-latex text-base font-bold tracking-wide text-canopy shadow-card">
-            SFCK
-          </div>
-          <div className="lg:hidden">
-            <div className="font-display text-lg font-bold leading-tight">SFCK Plantation ERP</div>
-            <div className="text-xs text-leaf/90">The State Farming Corporation of Kerala Ltd.</div>
-          </div>
-        </div>
+function LogoMark() {
+  return (
+    <span
+      className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl text-white shadow-card"
+      style={{ background: 'linear-gradient(135deg, var(--emerald), var(--leaf))' }}
+      aria-hidden="true"
+    >
+      <Leaf className="h-5 w-5" strokeWidth={2} />
+    </span>
+  );
+}
 
-        {/* Middle: headline + highlights (hidden on small screens) */}
-        <div className="relative z-10 hidden lg:block">
-          <h1 className="font-display text-4xl font-bold leading-[1.1] xl:text-5xl">
-            SFCK Plantation ERP
-          </h1>
-          <p className="mt-4 text-lg font-medium text-leaf">
-            The State Farming Corporation of Kerala Ltd.
-          </p>
-          <p className="mt-2 max-w-md text-sm text-white/70">
-            Estate · Production · Attendance · Payroll — one console.
-          </p>
+/* ------------------------------------------------------------------ */
+/* Page                                                                */
+/* ------------------------------------------------------------------ */
 
-          <ul className="mt-10 space-y-4">
-            {HIGHLIGHTS.map(({ icon: Icon, text }) => (
-              <li key={text} className="flex items-center gap-3 text-sm text-white/80">
-                <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-white/10 ring-1 ring-white/15">
-                  <Icon className="h-4.5 w-4.5 text-leaf" strokeWidth={1.75} />
-                </span>
-                {text}
-              </li>
+export default function Landing() {
+  const [activeRole, setActiveRole] = useState<RoleId>('md');
+  const role = ROLES.find((r) => r.id === activeRole)!;
+
+  return (
+    <div className="min-h-screen bg-paper text-ink">
+      {/* Smooth anchor scrolling for this page only */}
+      <style>{`html{scroll-behavior:smooth}`}</style>
+
+      {/* 1 — Sticky nav ------------------------------------------------ */}
+      <header className="sticky top-0 z-40 border-b border-line bg-paper/80 backdrop-blur">
+        <nav className="mx-auto flex h-16 w-full max-w-6xl items-center justify-between gap-4 px-4 sm:px-6">
+          <Link href="#overview" className="flex items-center gap-2.5">
+            <LogoMark />
+            <span className="font-display text-base font-bold tracking-tight text-ink sm:text-lg">
+              SFCK Plantation ERP
+            </span>
+          </Link>
+
+          <div className="hidden items-center gap-6 md:flex">
+            {NAV_LINKS.map((l) => (
+              <a
+                key={l.href}
+                href={l.href}
+                className="text-sm font-medium text-muted transition-colors hover:text-emerald-brand"
+              >
+                {l.label}
+              </a>
             ))}
-          </ul>
-        </div>
+          </div>
 
-        {/* Bottom: undertaking + demo pill (hidden on small screens) */}
-        <div className="relative z-10 hidden items-center gap-3 lg:flex">
-          <span className="inline-flex items-center gap-2 text-xs text-white/60">
-            <Leaf className="h-3.5 w-3.5 text-leaf/70" />
-            Government of Kerala Undertaking
-          </span>
-          <span className="inline-flex items-center rounded-full bg-clay px-2.5 py-0.5 text-[11px] font-bold uppercase tracking-wider text-white">
-            Demo
-          </span>
-        </div>
-      </aside>
+          <Link
+            href="/login"
+            className="inline-flex shrink-0 items-center gap-1.5 rounded-lg bg-emerald-brand px-3.5 py-2 text-sm font-semibold text-white shadow-card transition hover:-translate-y-0.5 hover:shadow-card-hover focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-brand focus-visible:ring-offset-2 focus-visible:ring-offset-paper"
+          >
+            <Rocket className="h-4 w-4" strokeWidth={2} />
+            <span className="hidden sm:inline">Launch live demo</span>
+            <span className="sm:hidden">Launch</span>
+          </Link>
+        </nav>
+      </header>
 
-      {/* Role selection panel */}
-      <section className="flex flex-1 items-center justify-center bg-paper px-6 py-12 lg:px-12">
-        <div className="w-full max-w-lg">
-          <div className="mb-1 flex items-center gap-3">
-            <h2 className="font-display text-2xl font-bold text-ink">Select your role</h2>
-            <span className="inline-flex items-center gap-1.5 rounded-full bg-clay/10 px-2.5 py-0.5 text-[11px] font-bold uppercase tracking-wider text-clay">
-              <span className="h-1.5 w-1.5 rounded-full bg-clay" />
-              Demo data
+      <main>
+        {/* 2 — Hero --------------------------------------------------- */}
+        <section
+          id="overview"
+          className="relative scroll-mt-20 overflow-hidden text-white"
+          style={{ background: 'linear-gradient(160deg, var(--canopy), var(--canopy-2))' }}
+        >
+          <Sprout
+            aria-hidden
+            className="pointer-events-none absolute -right-16 -top-10 h-80 w-80 text-leaf/[0.06] lg:h-[30rem] lg:w-[30rem]"
+            strokeWidth={1}
+          />
+          <div
+            aria-hidden
+            className="pointer-events-none absolute -left-32 bottom-0 h-96 w-96 rounded-full opacity-40 blur-3xl"
+            style={{ background: 'radial-gradient(circle, rgba(52,211,153,0.22), transparent 70%)' }}
+          />
+
+          <div className="relative z-10 mx-auto grid w-full max-w-6xl items-center gap-10 px-4 py-16 sm:px-6 lg:grid-cols-2 lg:py-24">
+            <div className="animate-rise">
+              <span className="inline-flex items-center gap-2 rounded-full bg-white/10 px-3 py-1 text-xs font-medium text-leaf ring-1 ring-white/15">
+                <Leaf className="h-3.5 w-3.5" />
+                The State Farming Corporation of Kerala Ltd.
+              </span>
+              <h1 className="mt-5 font-display text-4xl font-bold leading-[1.05] sm:text-5xl xl:text-6xl">
+                Run the entire plantation from one console.
+              </h1>
+              <p className="mt-5 max-w-xl text-base text-white/75 sm:text-lg">
+                SFCK Plantation ERP unifies field capture, attendance, the D4 wage engine, stock and
+                comparative MIS across every estate — with Malayalam payslips and a full, locked audit
+                trail. Estate to head office, one source of truth.
+              </p>
+
+              <div className="mt-8 flex flex-wrap gap-3">
+                <Link
+                  href="/login"
+                  className="inline-flex items-center gap-2 rounded-lg bg-white px-5 py-3 text-sm font-semibold text-canopy shadow-card transition hover:-translate-y-0.5 hover:shadow-card-hover focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-canopy"
+                >
+                  <Rocket className="h-4 w-4" />
+                  Launch live demo
+                </Link>
+                <a
+                  href="#features"
+                  className="inline-flex items-center gap-2 rounded-lg px-5 py-3 text-sm font-semibold text-white ring-1 ring-white/25 transition hover:bg-white/10"
+                >
+                  See the features
+                  <ArrowRight className="h-4 w-4" />
+                </a>
+              </div>
+
+              <div className="mt-8 flex flex-wrap items-center gap-x-5 gap-y-2 text-xs text-white/60">
+                <span className="flex items-center gap-1.5"><span className="mono font-semibold text-leaf">4</span> estates</span>
+                <span aria-hidden className="text-white/25">·</span>
+                <span className="flex items-center gap-1.5"><span className="mono font-semibold text-leaf">16</span> collection centres</span>
+                <span aria-hidden className="text-white/25">·</span>
+                <span className="flex items-center gap-1.5"><span className="mono font-semibold text-leaf">64</span> workers</span>
+                <span aria-hidden className="text-white/25">·</span>
+                <span className="flex items-center gap-1.5"><Languages className="h-3.5 w-3.5 text-leaf" /> Malayalam payslips</span>
+              </div>
+            </div>
+
+            <div className="animate-rise" style={{ '--rise-delay': '120ms' } as React.CSSProperties}>
+              <ProductionPulse
+                label="Season latex to date"
+                value={LATEX_TOTAL}
+                unit={UNIT}
+                series={DAILY}
+                chips={[
+                  { label: 'YoY', value: `+${YOY}%`, tone: 'up' },
+                  { label: '14-day', value: '+33.8%', tone: 'up' },
+                ]}
+              />
+            </div>
+          </div>
+        </section>
+
+        {/* 3 — Stat band --------------------------------------------- */}
+        <section className="mx-auto w-full max-w-6xl px-4 py-12 sm:px-6">
+          <div className="grid items-stretch gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            {[
+              { label: 'Estates', value: '4', icon: <Building2 className="h-5 w-5" /> },
+              { label: 'Collection Centres', value: '16', icon: <MapPin className="h-5 w-5" /> },
+              { label: 'Workers', value: '64', icon: <Users className="h-5 w-5" /> },
+              { label: 'Statutory documents', value: '10', icon: <FileText className="h-5 w-5" /> },
+            ].map((s, i) => (
+              <div key={s.label} className="h-full animate-rise" style={{ '--rise-delay': `${i * 80}ms` } as React.CSSProperties}>
+                <StatCard label={s.label} value={s.value} icon={s.icon} />
+              </div>
+            ))}
+          </div>
+        </section>
+
+        {/* 4 — Portals ----------------------------------------------- */}
+        <section id="portals" className="scroll-mt-20 bg-white py-16 sm:py-20">
+          <div className="mx-auto w-full max-w-6xl px-4 sm:px-6">
+            <SectionHeading
+              eyebrow="Three tiers, one system"
+              title="A portal for every level of the corporation"
+              lead="From the tapper at the collection centre to the Managing Director in head office — each role gets exactly the console it needs."
+            />
+            <div className="mt-10 grid items-stretch gap-4 md:grid-cols-3">
+              {PORTALS.map((p, i) => (
+                <div
+                  key={p.title}
+                  className="flex h-full animate-rise flex-col rounded-2xl border border-line bg-white p-5 shadow-card transition-shadow hover:shadow-card-hover"
+                  style={{ '--rise-delay': `${i * 90}ms` } as React.CSSProperties}
+                >
+                  <span className="flex h-11 w-11 items-center justify-center rounded-xl bg-emerald-50 text-emerald-brand">
+                    <p.icon className="h-5 w-5" strokeWidth={1.75} />
+                  </span>
+                  <h3 className="mt-4 font-display text-lg font-bold text-ink">{p.title}</h3>
+                  <div className="mt-0.5 text-[11px] font-semibold uppercase tracking-wider text-muted">{p.who}</div>
+                  <ul className="mt-4 space-y-2.5">
+                    {p.specs.map((spec) => (
+                      <li key={spec} className="flex gap-2.5 text-sm text-ink/80">
+                        <Leaf className="mt-0.5 h-4 w-4 shrink-0 text-leaf" strokeWidth={2} />
+                        {spec}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* 5 — Modules ----------------------------------------------- */}
+        <section id="modules" className="mx-auto w-full max-w-6xl scroll-mt-20 px-4 py-16 sm:px-6 sm:py-20">
+          <SectionHeading
+            eyebrow="8 functional modules"
+            title="Everything the plantation runs on"
+            lead="A complete operational spine — from the employee master to comparative MIS — built to the SFCK requirement spec."
+          />
+          <div className="mt-10 grid items-stretch gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
+            {MODULES.map((m, i) => (
+              <div
+                key={m.id}
+                className="flex h-full animate-rise flex-col rounded-2xl border border-line bg-white p-5 shadow-card transition-shadow hover:shadow-card-hover"
+                style={{ '--rise-delay': `${i * 60}ms` } as React.CSSProperties}
+              >
+                <div className="flex items-center justify-between">
+                  <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-50 text-emerald-brand">
+                    <m.icon className="h-5 w-5" strokeWidth={1.75} />
+                  </span>
+                  <span className="mono text-xs font-semibold text-muted">{m.id}</span>
+                </div>
+                <h3 className="mt-3 text-sm font-semibold text-ink">{m.title}</h3>
+                <p className="mt-1 text-xs leading-relaxed text-muted">{m.desc}</p>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        {/* 6 — Interactive features ---------------------------------- */}
+        <section id="features" className="scroll-mt-20 bg-white py-16 sm:py-20">
+          <div className="mx-auto w-full max-w-6xl px-4 sm:px-6">
+            <SectionHeading
+              eyebrow="Live, interactive widgets"
+              title="The real dashboard, on the landing page"
+              lead="Every chart below is the exact component that powers the estate console — fed with demo data."
+            />
+
+            {/* Row A: comparative chart (2/3) + gauge (1/3) */}
+            <div className="mt-10 grid items-stretch gap-4 lg:grid-cols-3">
+              <div className="h-full animate-rise lg:col-span-2">
+                <figure className="flex h-full flex-col">
+                  <ProductionChart data={BY_ESTATE} />
+                  <figcaption className="mt-3 text-sm text-muted">
+                    <span className="font-semibold text-ink">Year-on-year comparative MIS</span> — current vs prior
+                    season production, estate by estate.
+                  </figcaption>
+                </figure>
+              </div>
+              <div className="h-full animate-rise" style={{ '--rise-delay': '90ms' } as React.CSSProperties}>
+                <div className="flex h-full flex-col rounded-2xl border border-line bg-white p-5 shadow-card">
+                  <h3 className="text-lg font-semibold text-ink">CC-wise DRC consolidation</h3>
+                  <p className="mt-1 text-sm text-muted">Average dry rubber content across all collection centres.</p>
+                  <div className="mt-auto flex items-center justify-center pt-4">
+                    <RadialGauge value={AVG_DRC} max={100} label="Avg DRC" unit="%" />
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Row B: workforce donut + daily trend + audit timeline */}
+            <div className="mt-4 grid items-stretch gap-4 lg:grid-cols-3">
+              <div className="h-full animate-rise">
+                <div className="flex h-full flex-col rounded-2xl border border-line bg-white p-5 shadow-card">
+                  <h3 className="text-lg font-semibold text-ink">Workforce mix</h3>
+                  <p className="mt-1 text-sm text-muted">Worker classification across the corporation.</p>
+                  <div className="mt-auto flex flex-1 items-center justify-center pt-4">
+                    <Donut segments={categoryMix(WORKFORCE)} />
+                  </div>
+                </div>
+              </div>
+
+              <div className="h-full animate-rise" style={{ '--rise-delay': '90ms' } as React.CSSProperties}>
+                <div className="flex h-full flex-col">
+                  <StatCard label="Daily production trend" value="1,397 kg" delta="+33.8% 14-day" tone="up" series={DAILY} />
+                </div>
+              </div>
+
+              <div className="h-full animate-rise" style={{ '--rise-delay': '180ms' } as React.CSSProperties}>
+                <div className="flex h-full flex-col rounded-2xl border border-line bg-white p-5 shadow-card">
+                  <div className="mb-3 flex items-center gap-2">
+                    <ShieldCheck className="h-4.5 w-4.5 text-emerald-brand" />
+                    <h3 className="text-lg font-semibold text-ink">Audit trail — data integrity</h3>
+                  </div>
+                  <p className="mb-4 text-sm text-muted">Locked data with a full, immutable audit log.</p>
+                  <div className="mt-auto">
+                    <Timeline items={TIMELINE} />
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* 7 — Roles / RBAC ------------------------------------------ */}
+        <section id="roles" className="mx-auto w-full max-w-6xl scroll-mt-20 px-4 py-16 sm:px-6 sm:py-20">
+          <SectionHeading
+            eyebrow="Role-based access control"
+            title="Every user sees only their jurisdiction"
+            lead="Five roles, each bound to a scope. Select one to see what it unlocks."
+          />
+
+          <div
+            className="mt-10 overflow-hidden rounded-2xl border border-line p-6 text-white shadow-card sm:p-8"
+            style={{ background: 'linear-gradient(160deg, var(--canopy), var(--canopy-2))' }}
+          >
+            <div className="flex flex-wrap gap-2">
+              {ROLES.map((r) => {
+                const active = r.id === activeRole;
+                return (
+                  <button
+                    key={r.id}
+                    type="button"
+                    onClick={() => setActiveRole(r.id)}
+                    aria-pressed={active}
+                    className={`rounded-full px-4 py-2 text-sm font-semibold transition focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-canopy ${
+                      active
+                        ? 'bg-white text-canopy shadow-card'
+                        : 'bg-white/10 text-white/80 ring-1 ring-white/15 hover:bg-white/20'
+                    }`}
+                  >
+                    {r.label}
+                  </button>
+                );
+              })}
+            </div>
+
+            <div className="mt-8 grid gap-6 sm:grid-cols-[auto_1fr] sm:items-center">
+              <div>
+                <div className="text-[11px] font-semibold uppercase tracking-wider text-leaf">Scope</div>
+                <div className="mono mt-1 text-2xl font-bold">{role.scope}</div>
+              </div>
+              <div className="sm:border-l sm:border-white/15 sm:pl-6">
+                <div className="font-display text-xl font-bold">{role.label}</div>
+                <p className="mt-2 max-w-2xl text-sm text-white/75">{ROLE_ACCESS[activeRole]}</p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* 8 — Documents / Malayalam --------------------------------- */}
+        <section id="docs" className="scroll-mt-20 bg-white py-16 sm:py-20">
+          <div className="mx-auto w-full max-w-6xl px-4 sm:px-6">
+            <SectionHeading
+              eyebrow="10 statutory documents"
+              title="Compliance-ready, in the right language"
+              lead="Every register and slip the estate is required to produce — including a worker-facing Malayalam payslip."
+            />
+            <div className="mt-10 grid gap-3 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
+              {DOCUMENTS.map((d, i) => (
+                <div
+                  key={d.name}
+                  className={`flex animate-rise items-center gap-3 rounded-2xl border p-4 shadow-card transition-shadow hover:shadow-card-hover ${
+                    d.malayalam ? 'border-emerald-brand/40 bg-emerald-50/60' : 'border-line bg-white'
+                  }`}
+                  style={{ '--rise-delay': `${i * 40}ms` } as React.CSSProperties}
+                >
+                  <span
+                    className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-xl ${
+                      d.malayalam ? 'bg-emerald-brand text-white' : 'bg-latex text-emerald-brand'
+                    }`}
+                  >
+                    <FileText className="h-4.5 w-4.5" strokeWidth={1.75} />
+                  </span>
+                  <div className="min-w-0">
+                    <div className="truncate text-sm font-semibold text-ink">{d.name}</div>
+                    {d.malayalam && (
+                      <div className="text-sm font-semibold text-emerald-brand" style={{ fontFamily: 'var(--font-ml)' }}>
+                        ശമ്പള സ്ലിപ്പ്
+                      </div>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* 9 — Design & tech spec ------------------------------------ */}
+        <section className="mx-auto w-full max-w-6xl px-4 py-16 sm:px-6 sm:py-20">
+          <SectionHeading eyebrow="Design & engineering" title="Built like a product, not a prototype" />
+
+          <div className="mt-10 grid items-stretch gap-4 lg:grid-cols-3">
+            {/* Stack */}
+            <div className="flex h-full flex-col rounded-2xl border border-line bg-white p-5 shadow-card">
+              <h3 className="text-lg font-semibold text-ink">Stack</h3>
+              <ul className="mt-4 space-y-3">
+                {STACK.map((s) => (
+                  <li key={s.label} className="flex items-center gap-3">
+                    <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-latex text-emerald-brand">
+                      <s.icon className="h-4.5 w-4.5" strokeWidth={1.75} />
+                    </span>
+                    <div>
+                      <div className="text-sm font-semibold text-ink">{s.label}</div>
+                      <div className="text-xs text-muted">{s.sub}</div>
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            {/* Tokens + type */}
+            <div className="flex h-full flex-col rounded-2xl border border-line bg-white p-5 shadow-card">
+              <h3 className="text-lg font-semibold text-ink">Design tokens</h3>
+              <div className="mt-4 flex flex-wrap gap-3">
+                {SWATCHES.map((sw) => (
+                  <div key={sw.name} className="flex flex-col items-center gap-1.5">
+                    <span
+                      className="h-10 w-10 rounded-xl border border-line shadow-card"
+                      style={{ background: sw.varName }}
+                      aria-hidden="true"
+                    />
+                    <span className="text-[11px] font-medium text-muted">{sw.name}</span>
+                  </div>
+                ))}
+              </div>
+              <div className="mt-5 border-t border-line pt-4">
+                <div className="text-[11px] font-semibold uppercase tracking-wider text-muted">Typography</div>
+                <ul className="mt-2 space-y-1.5">
+                  {TYPE_FACES.map((t) => (
+                    <li key={t} className="text-sm text-ink/80">{t}</li>
+                  ))}
+                </ul>
+              </div>
+            </div>
+
+            {/* Headline facts */}
+            <div
+              className="flex h-full flex-col justify-center rounded-2xl border border-line p-5 text-white shadow-card"
+              style={{ background: 'linear-gradient(160deg, var(--canopy), var(--canopy-2))' }}
+            >
+              <h3 className="font-display text-lg font-bold">By the numbers</h3>
+              <dl className="mt-4 grid grid-cols-2 gap-4">
+                {[
+                  { k: 'Roles', v: '5' },
+                  { k: 'Modules', v: '8' },
+                  { k: 'Requirements', v: '23' },
+                  { k: 'Documents', v: '10' },
+                ].map((f) => (
+                  <div key={f.k}>
+                    <dd className="mono text-3xl font-bold text-leaf">{f.v}</dd>
+                    <dt className="mt-0.5 text-xs text-white/70">{f.k}</dt>
+                  </div>
+                ))}
+              </dl>
+              <div className="mt-5 flex flex-wrap gap-2 border-t border-white/15 pt-4 text-xs text-white/70">
+                <span className="inline-flex items-center gap-1.5"><WifiOff className="h-3.5 w-3.5 text-leaf" /> Offline-first</span>
+                <span className="inline-flex items-center gap-1.5"><MessageSquare className="h-3.5 w-3.5 text-leaf" /> SMS slips</span>
+                <span className="inline-flex items-center gap-1.5"><Languages className="h-3.5 w-3.5 text-leaf" /> Malayalam</span>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* 10 — Final CTA + footer ----------------------------------- */}
+        <section
+          className="relative overflow-hidden text-white"
+          style={{ background: 'linear-gradient(160deg, var(--canopy), var(--canopy-2))' }}
+        >
+          <Sprout
+            aria-hidden
+            className="pointer-events-none absolute -bottom-16 -right-10 h-72 w-72 text-leaf/[0.06] lg:h-96 lg:w-96"
+            strokeWidth={1}
+          />
+          <div className="relative z-10 mx-auto w-full max-w-6xl px-4 py-16 text-center sm:px-6 sm:py-20">
+            <h2 className="font-display text-3xl font-bold sm:text-4xl">Explore the live demo</h2>
+            <p className="mx-auto mt-4 max-w-xl text-base text-white/75">
+              Step into any role and see the estate console with realistic plantation data — no signup required.
+            </p>
+            <div className="mt-8 flex justify-center">
+              <Link
+                href="/login"
+                className="inline-flex items-center gap-2 rounded-lg bg-white px-6 py-3 text-sm font-semibold text-canopy shadow-card transition hover:-translate-y-0.5 hover:shadow-card-hover focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-canopy"
+              >
+                <Rocket className="h-4 w-4" />
+                Launch live demo
+                <ArrowRight className="h-4 w-4" />
+              </Link>
+            </div>
+          </div>
+        </section>
+
+        <footer className="border-t border-line bg-paper">
+          <div className="mx-auto flex w-full max-w-6xl flex-col items-center justify-between gap-3 px-4 py-8 text-center sm:flex-row sm:px-6 sm:text-left">
+            <div className="flex items-center gap-2.5">
+              <LogoMark />
+              <span className="text-xs text-muted">
+                © 2026 The State Farming Corporation of Kerala Ltd. · Government of Kerala Undertaking
+              </span>
+            </div>
+            <span className="inline-flex items-center gap-1.5 rounded-full bg-latex px-3 py-1 text-[11px] font-semibold text-muted">
+              <Leaf className="h-3.5 w-3.5 text-emerald-brand" />
+              Built as a demo
             </span>
           </div>
-          <p className="mb-8 text-sm text-muted">Choose a role to explore the system.</p>
-
-          <div className="grid gap-4 sm:grid-cols-2">
-            {ROLES.map((r, i) => {
-              const Icon = ROLE_ICONS[r.id];
-              return (
-                <button
-                  key={r.id}
-                  onClick={() => {
-                    setSession({ role: r.id, scopeId: DEMO_SCOPE[r.id] });
-                    router.push('/dashboard');
-                  }}
-                  style={{ '--rise-delay': `${i * 60}ms` } as React.CSSProperties}
-                  className="group animate-rise rounded-2xl border border-line bg-white p-5 text-left shadow-card transition duration-200 hover:-translate-y-0.5 hover:border-emerald-brand hover:shadow-card-hover focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-brand focus-visible:ring-offset-2 focus-visible:ring-offset-paper"
-                >
-                  <div className="mb-4 flex h-11 w-11 items-center justify-center rounded-xl bg-emerald-50 text-emerald-brand transition group-hover:bg-emerald-brand group-hover:text-white">
-                    <Icon className="h-5 w-5" strokeWidth={1.75} />
-                  </div>
-                  <div className="font-semibold text-ink">{r.label}</div>
-                  <div className="mt-0.5 text-sm text-muted">{r.scope}</div>
-                </button>
-              );
-            })}
-          </div>
-
-          <p className="mt-10 text-xs text-muted/80">
-            © 2026 The State Farming Corporation of Kerala Ltd. · Government of Kerala Undertaking
-          </p>
-        </div>
-      </section>
-    </main>
+        </footer>
+      </main>
+    </div>
   );
 }
