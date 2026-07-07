@@ -1,7 +1,7 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
+  --background: #f3f8f5;
   --foreground: #171717;
 }
 
@@ -23,6 +23,19 @@ body {
   background: var(--background);
   color: var(--foreground);
   font-family: var(--font-inter), system-ui, sans-serif;
+}
+
+h1, h2, h3 {
+  font-family: var(--font-display), var(--font-inter), system-ui, sans-serif;
+  letter-spacing: -0.02em;
+}
+
+.font-display {
+  font-family: var(--font-display), var(--font-inter), system-ui, sans-serif;
+}
+
+.tnum {
+  font-variant-numeric: tabular-nums;
 }
 
 @media print {

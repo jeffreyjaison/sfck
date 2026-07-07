@@ -4,6 +4,7 @@ import { useEffect } from 'react';
 import { useSession } from '@/components/RoleProvider';
 import { Sidebar } from '@/components/Sidebar';
 import { ScopeBanner } from '@/components/ScopeBanner';
+import { AppFooter } from '@/components/AppFooter';
 
 export default function AppLayout({ children }: { children: React.ReactNode }) {
   const { session, hydrated } = useSession();
@@ -15,7 +16,8 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
       <Sidebar />
       <div className="flex-1 flex flex-col">
         <ScopeBanner />
-        <main className="p-6">{children}</main>
+        <main className="p-6 flex-1">{children}</main>
+        <AppFooter />
       </div>
     </div>
   );
