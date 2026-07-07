@@ -32,7 +32,7 @@ export async function GET(req: Request) {
     markedAt: r.markedAt,
     isExcess: r.isExcess,
     status: r.status,
-    outcome: tapperAttendanceOutcome(r.markedAt),
+    outcome: workerType.get(r.workerId) === 'Tapper' ? tapperAttendanceOutcome(r.markedAt) : 'Approved',
   }));
 
   return NextResponse.json({
@@ -46,6 +46,7 @@ export async function GET(req: Request) {
 }
 
 export async function POST(req: Request) {
+  const session = sessionFromRequest(req);
   const body = await req.json().catch(() => null);
   const action = body?.action;
   const id = Number(body?.id);
@@ -54,17 +55,25 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: 'id is required' }, { status: 400 });
   }
 
-  if (action === 'approve') {
-    await db.update(attendance).set({ status: 'Approved' }).where(eq(attendance.id, id));
-    return NextResponse.json({ ok: true });
-  }
+  if (action === 'approve' || action === 'reject' || action === 'markExcess') {
+    const [row] = await db.select().from(attendance).where(eq(attendance.id, id));
+    if (!row) {
+      return NextResponse.json({ error: 'Out of jurisdiction' }, { status: 403 });
+    }
+    const workers = await workersForSession(session);
+    const inScope = new Set(workers.map((w) => w.id));
+    if (!inScope.has(row.workerId)) {
+      return NextResponse.json({ error: 'Out of jurisdiction' }, { status: 403 });
+    }
 
-  if (action === 'reject') {
-    await db.update(attendance).set({ status: 'Rejected' }).where(eq(attendance.id, id));
-    return NextResponse.json({ ok: true });
-  }
-
-  if (action === 'markExcess') {
+    if (action === 'approve') {
+      await db.update(attendance).set({ status: 'Approved' }).where(eq(attendance.id, id));
+      return NextResponse.json({ ok: true });
+    }
+    if (action === 'reject') {
+      await db.update(attendance).set({ status: 'Rejected' }).where(eq(attendance.id, id));
+      return NextResponse.json({ ok: true });
+    }
     await db.update(attendance).set({ isExcess: true, status: 'Approved' }).where(eq(attendance.id, id));
     return NextResponse.json({ ok: true });
   }

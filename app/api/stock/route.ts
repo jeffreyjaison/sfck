@@ -64,6 +64,7 @@ export async function GET(req: Request) {
 }
 
 export async function POST(req: Request) {
+  const session = sessionFromRequest(req);
   const body = await req.json().catch(() => null);
   const action = body?.action;
 
@@ -77,6 +78,11 @@ export async function POST(req: Request) {
     if (!item) {
       return NextResponse.json({ error: 'Unknown item' }, { status: 400 });
     }
+    const estates = await estatesForSession(session);
+    const estateIds = new Set(estates.map((e) => e.id));
+    if (!estateIds.has(item.estateId)) {
+      return NextResponse.json({ error: 'Out of jurisdiction' }, { status: 403 });
+    }
     const newBalance = Math.max(0, Number(item.balance) - qty);
     await db.update(stockItems).set({ balance: newBalance.toString() }).where(eq(stockItems.id, itemId));
     return NextResponse.json({ ok: true });
@@ -89,6 +95,11 @@ export async function POST(req: Request) {
     if (!ccId || typeof item !== 'string' || !item.trim() || !Number.isFinite(qty)) {
       return NextResponse.json({ error: 'ccId, item and qty are required' }, { status: 400 });
     }
+    const ccs = await ccsForSession(session);
+    const ccIds = new Set(ccs.map((c) => c.id));
+    if (!ccIds.has(ccId)) {
+      return NextResponse.json({ error: 'Out of jurisdiction' }, { status: 403 });
+    }
     await db.insert(requisitions).values({ ccId, item, qty, status: 'Pending' });
     return NextResponse.json({ ok: true });
   }
@@ -98,6 +109,15 @@ export async function POST(req: Request) {
     const status = body?.status;
     if (!reqId || (status !== 'Approved' && status !== 'Rejected')) {
       return NextResponse.json({ error: 'reqId and a valid status are required' }, { status: 400 });
+    }
+    const [reqRow] = await db.select().from(requisitions).where(eq(requisitions.id, reqId));
+    if (!reqRow) {
+      return NextResponse.json({ error: 'Out of jurisdiction' }, { status: 403 });
+    }
+    const ccs = await ccsForSession(session);
+    const ccIds = new Set(ccs.map((c) => c.id));
+    if (!ccIds.has(reqRow.ccId)) {
+      return NextResponse.json({ error: 'Out of jurisdiction' }, { status: 403 });
     }
     await db.update(requisitions).set({ status }).where(eq(requisitions.id, reqId));
     return NextResponse.json({ ok: true });
