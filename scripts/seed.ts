@@ -46,7 +46,7 @@ async function main() {
         const people = [
           { category: 'Permanent', type: 'Tapper' },
           { category: 'Casual', type: 'Tapper' },
-          { category: 'Dependent', type: 'General' },
+          { category: 'Dependent', type: 'Tapper' },
           { category: 'Permanent', type: 'General' },
         ] as const;
         const firstNames = ['Rajan', 'Suresh', 'Latha', 'Vijayan', 'Ambika', 'Ravi', 'Sunil', 'Geetha', 'Manoj', 'Bindu', 'Anil', 'Sreeja', 'Prakash', 'Reshma', 'Biju', 'Divya'];
@@ -105,14 +105,14 @@ async function main() {
     daysCurrent.forEach((day, di) => {
       collectionRows.push({
         workerId: w.id, ccId: w.ccId!, day,
-        latexKg: String(18 + ((i + di) % 8)), scrapKg: String(2 + ((i + di) % 4)),
+        latexKg: String(48 + ((i + di) % 24)), scrapKg: String(4 + ((i + di) % 5)),
         drc: drcFor(i + di), locked: true, slipSentSms: true,
       });
     });
     daysPrior.forEach((day, di) => {
       collectionRows.push({
         workerId: w.id, ccId: w.ccId!, day,
-        latexKg: String(15 + ((i + di) % 7)), scrapKg: String(2 + ((i + di) % 3)),
+        latexKg: String(38 + ((i + di) % 20)), scrapKg: String(3 + ((i + di) % 4)),
         drc: drcFor(i + di), locked: true, slipSentSms: true,
       });
     });
