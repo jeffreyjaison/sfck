@@ -1,8 +1,8 @@
 import { NextResponse } from 'next/server';
 import { sessionFromRequest } from '@/lib/api-session';
-import { estatesForSession } from '@/lib/db/queries';
+import { estatesForSession, workersForSession } from '@/lib/db/queries';
 import { db } from '@/lib/db/client';
-import { workers, collections, attendance, estates as estatesTable } from '@/lib/db/schema';
+import { collections, attendance, estates as estatesTable } from '@/lib/db/schema';
 import { inArray } from 'drizzle-orm';
 
 export const dynamic = 'force-dynamic';
@@ -12,16 +12,19 @@ export async function GET(req: Request) {
   const estates = await estatesForSession(session);
   const estateById = new Map(estates.map((e) => [e.id, e]));
   const estateIds = estates.map((e) => e.id);
-  const allEstates = await db.select().from(estatesTable);
+  const allEstateRows = await db.select().from(estatesTable);
+  const inScopeIds = new Set(estateIds);
+  const allEstates = allEstateRows.map((e) => ({ id: e.id, name: e.name, inScope: inScopeIds.has(e.id) }));
   if (!estateIds.length) {
     return NextResponse.json({
       stats: { totalLatexKg: 0, activeWorkers: 0, pendingApprovals: 0, yoyPercent: 0 },
       byEstate: [],
-      totalEstates: allEstates.length,
+      totalEstates: allEstateRows.length,
       inScopeEstates: 0,
+      allEstates,
     });
   }
-  const ws = await db.select().from(workers).where(inArray(workers.estateId, estateIds));
+  const ws = await workersForSession(session);
   const workerEstate = new Map(ws.map((w) => [w.id, w.estateId]));
   const workerIds = ws.map((w) => w.id);
   const cols = workerIds.length ? await db.select().from(collections).where(inArray(collections.workerId, workerIds)) : [];
@@ -53,7 +56,8 @@ export async function GET(req: Request) {
       current: Math.round(perEstate.get(id)!.current),
       prior: Math.round(perEstate.get(id)!.prior),
     })),
-    totalEstates: allEstates.length,
+    totalEstates: allEstateRows.length,
     inScopeEstates: estateIds.length,
+    allEstates,
   });
 }

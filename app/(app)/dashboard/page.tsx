@@ -10,9 +10,47 @@ type Dash = {
   byEstate: { estate: string; current: number; prior: number }[];
   totalEstates: number;
   inScopeEstates: number;
+  allEstates: { id: number; name: string; inScope: boolean }[];
 };
 
 type AuditEntry = { id: number; actorRole: string; action: string; entity: string; at: string };
+
+function EstatesJurisdictionPanel({
+  allEstates,
+  byEstate,
+}: {
+  allEstates: { id: number; name: string; inScope: boolean }[];
+  byEstate: { estate: string; current: number; prior: number }[];
+}) {
+  const productionByName = new Map(byEstate.map((e) => [e.estate, e]));
+  return (
+    <div className="rounded-xl border bg-white p-4">
+      <h2 className="text-lg font-semibold">Estates — Jurisdiction</h2>
+      <ul className="mt-3 space-y-2 text-sm">
+        {allEstates.map((e) => {
+          const prod = productionByName.get(e.name);
+          return (
+            <li
+              key={e.id}
+              className={`flex items-center justify-between border-t pt-2 first:border-t-0 first:pt-0 ${e.inScope ? '' : 'bg-slate-50 opacity-60'}`}
+            >
+              <span className="font-medium text-slate-700">{e.name}</span>
+              {e.inScope ? (
+                <span className="text-slate-600">
+                  {prod ? `${prod.current.toLocaleString()} kg (current)` : '—'}
+                </span>
+              ) : (
+                <span className="flex items-center gap-1 text-slate-400">
+                  🔒 Restricted — outside your jurisdiction
+                </span>
+              )}
+            </li>
+          );
+        })}
+      </ul>
+    </div>
+  );
+}
 
 function AuditTrailPanel() {
   const { session } = useSession();
@@ -62,6 +100,7 @@ export default function DashboardPage() {
         <StatCard label="Estates in Scope" value={String(data.byEstate.length)} />
       </div>
       <ProductionChart data={data.byEstate} />
+      <EstatesJurisdictionPanel allEstates={data.allEstates} byEstate={data.byEstate} />
       <AuditTrailPanel />
     </div>
   );
