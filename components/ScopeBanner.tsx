@@ -12,6 +12,9 @@ export function ScopeBanner() {
       <div className="text-sm">
         <span className="font-medium text-slate-700">{role.label}</span>
         <span className="text-slate-400"> · {role.scope}</span>
+        {role.id !== 'md' && (
+          <span className="text-slate-300"> · jurisdiction-restricted</span>
+        )}
       </div>
       <div className="flex items-center gap-3">
         <span className="rounded-full bg-amber-100 px-2 py-0.5 text-xs text-amber-700">Demo data</span>

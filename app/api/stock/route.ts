@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 import { sessionFromRequest } from '@/lib/api-session';
 import { estatesForSession, ccsForSession, workersForSession } from '@/lib/db/queries';
 import { db } from '@/lib/db/client';
-import { stockItems, requisitions, collections } from '@/lib/db/schema';
+import { stockItems, requisitions, collections, auditLog } from '@/lib/db/schema';
 import { eq, inArray } from 'drizzle-orm';
 
 export const dynamic = 'force-dynamic';
@@ -85,6 +85,11 @@ export async function POST(req: Request) {
     }
     const newBalance = Math.max(0, Number(item.balance) - qty);
     await db.update(stockItems).set({ balance: newBalance.toString() }).where(eq(stockItems.id, itemId));
+    await db.insert(auditLog).values({
+      actorRole: session.role,
+      action: 'factory-dispatch',
+      entity: `stock:${itemId} qty:${qty}`,
+    });
     return NextResponse.json({ ok: true });
   }
 

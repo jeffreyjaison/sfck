@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 import { sessionFromRequest } from '@/lib/api-session';
 import { workersForSession } from '@/lib/db/queries';
 import { db } from '@/lib/db/client';
-import { attendance } from '@/lib/db/schema';
+import { attendance, auditLog } from '@/lib/db/schema';
 import { eq, inArray, and } from 'drizzle-orm';
 import { tapperAttendanceOutcome } from '@/lib/engine/attendance';
 
@@ -75,6 +75,11 @@ export async function POST(req: Request) {
       return NextResponse.json({ ok: true });
     }
     await db.update(attendance).set({ isExcess: true, status: 'Approved' }).where(eq(attendance.id, id));
+    await db.insert(auditLog).values({
+      actorRole: session.role,
+      action: 'excess-voucher-created',
+      entity: `attendance:${id}`,
+    });
     return NextResponse.json({ ok: true });
   }
 

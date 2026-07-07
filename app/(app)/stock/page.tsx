@@ -34,22 +34,25 @@ function TransferControl({ item, onDone }: { item: StockItem; onDone: () => void
   };
 
   return (
-    <div className="flex items-center gap-2">
-      <input
-        type="number"
-        min="0"
-        placeholder="Qty"
-        value={qty}
-        onChange={(e) => setQty(e.target.value)}
-        className="w-20 rounded-lg border px-2 py-1 text-sm"
-      />
-      <button
-        onClick={transfer}
-        disabled={busy}
-        className="rounded-lg bg-emerald-600 px-3 py-1.5 text-xs text-white hover:bg-emerald-700 disabled:opacity-50"
-      >
-        Transfer to factory
-      </button>
+    <div className="flex flex-col gap-1">
+      <div className="flex items-center gap-2">
+        <input
+          type="number"
+          min="0"
+          placeholder="Qty"
+          value={qty}
+          onChange={(e) => setQty(e.target.value)}
+          className="w-20 rounded-lg border px-2 py-1 text-sm"
+        />
+        <button
+          onClick={transfer}
+          disabled={busy}
+          className="rounded-lg bg-emerald-600 px-3 py-1.5 text-xs text-white hover:bg-emerald-700 disabled:opacity-50"
+        >
+          Dispatch to factory
+        </button>
+      </div>
+      <span className="text-[11px] text-slate-400">recorded as factory dispatch</span>
     </div>
   );
 }
