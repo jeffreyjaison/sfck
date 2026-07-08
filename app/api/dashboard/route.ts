@@ -10,10 +10,13 @@ export const dynamic = 'force-dynamic';
 
 export async function GET(req: Request) {
   const session = sessionFromRequest(req);
-  const estates = await estatesForSession(session);
+  // Independent queries — run concurrently instead of sequentially (cuts round-trips).
+  const [estates, allEstateRows] = await Promise.all([
+    estatesForSession(session),
+    db.select().from(estatesTable),
+  ]);
   const estateById = new Map(estates.map((e) => [e.id, e]));
   const estateIds = estates.map((e) => e.id);
-  const allEstateRows = await db.select().from(estatesTable);
   const inScopeIds = new Set(estateIds);
   const allEstates = allEstateRows.map((e) => ({ id: e.id, name: e.name, inScope: inScopeIds.has(e.id) }));
   if (!estateIds.length) {
@@ -31,8 +34,13 @@ export async function GET(req: Request) {
   const ws = await workersForSession(session);
   const workerEstate = new Map(ws.map((w) => [w.id, w.estateId]));
   const workerIds = ws.map((w) => w.id);
-  const cols = workerIds.length ? await db.select().from(collections).where(inArray(collections.workerId, workerIds)) : [];
-  const atts = workerIds.length ? await db.select().from(attendance).where(inArray(attendance.workerId, workerIds)) : [];
+  // collections + attendance both key off workerIds — fetch them concurrently.
+  const [cols, atts] = workerIds.length
+    ? await Promise.all([
+        db.select().from(collections).where(inArray(collections.workerId, workerIds)),
+        db.select().from(attendance).where(inArray(attendance.workerId, workerIds)),
+      ])
+    : [[], []];
 
   let curLatex = 0, priorLatex = 0;
   const perEstate = new Map<number, { current: number; prior: number }>();
