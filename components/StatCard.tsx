@@ -23,19 +23,23 @@ export function StatCard({
   label,
   value,
   delta,
+  note,
   tone,
   series,
   icon,
 }: {
   label: string;
   value: string;
+  /** Short badge text — rendered as a rounded pill; keep it to a few words. */
   delta?: string;
+  /** Longer footnote — rendered as plain wrapping muted text (use instead of `delta` for long strings). */
+  note?: string;
   tone?: Tone;
   series?: number[];
   icon?: React.ReactNode;
 }) {
   const t = resolveTone(tone, delta);
-  const hasFooter = Boolean(delta) || Boolean(series && series.length > 0);
+  const hasFooter = Boolean(delta) || Boolean(note) || Boolean(series && series.length > 0);
   return (
     <div className="group flex h-full flex-col rounded-2xl border border-line bg-white p-5 shadow-card transition-shadow hover:shadow-card-hover">
       <div className="flex items-start justify-between gap-3">
@@ -50,8 +54,9 @@ export function StatCard({
               {delta}
             </span>
           )}
+          {note && <div className={`text-xs text-muted ${delta ? 'mt-1.5' : ''}`}>{note}</div>}
           {series && series.length > 0 && (
-            <div className={delta ? 'mt-3' : ''}>
+            <div className={delta || note ? 'mt-3' : ''}>
               <Sparkline values={series} width={220} height={36} className="w-full" />
             </div>
           )}

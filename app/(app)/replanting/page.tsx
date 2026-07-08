@@ -56,7 +56,7 @@ export default function ReplantingPage() {
         <StatCard
           label="ROI"
           value={`${data.roi.roiPct >= 0 ? '+' : ''}${data.roi.roiPct}%`}
-          delta={`${currency(data.roi.expenditure)} spent · ${currency(data.roi.yieldValue)} yield value`}
+          note={`${currency(data.roi.expenditure)} spent · ${currency(data.roi.yieldValue)} yield value`}
         />
       </div>
 
