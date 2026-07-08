@@ -82,6 +82,20 @@ Working tree clean; `main` == `origin/main`; prod == latest.
 
 ---
 
+## 6 · Security/integrity audit + Option A fixes  (commits `de1f74d`, `a63d099` — deployed to prod)
+
+Full-build audit (pipeline green; 2 subagent code audits: UI + functional). Option A ("demo-credible integrity") fixed via TDD (21 new tests, 77 total):
+
+- **Root cause found:** `sessionFromRequest` defaulted to `md` AND no client POST sent session params → every write ran at max privilege. Fixed: least-privilege default (`cc`), NaN scopeId → null, all 10 mutating fetches now use `withSession()` (new helper in `lib/client-fetch.ts`).
+- **Settings POST** now gated (`canManageSettings`: am/md, new `lib/authz.ts`) + numeric validation — was fully unauthenticated and drives payroll math.
+- **Payroll finalize**: gated (am/em/md); recomputes ALL wage figures server-side via new pure `lib/engine/payroll.ts` (GET shares it); only client input honored is "other recovery" (clamped ≥0); idempotent per estate/period (409); Draft→Finalized insert ordering (no finalized orphans — neon-http has no transactions).
+- **Field capture**: worker + CC must be in caller's jurisdiction (403).
+- **DRC averages** exclude null-DRC rows (`averageDrc` in `lib/engine/drc.ts`) — dashboard + payroll.
+- **UI:** StatCard gained `note` prop (wrapping text); Replanting ROI card no longer a wrapped pill blob at 390px (verified local + prod screenshots, 0px overflow).
+- Verified e2e on local AND live prod: 403s for unauth settings/finalize/out-of-scope capture; forged finalize lines ignored (checked Neon rows); double-finalize 409; test rows cleaned from shared DB.
+
+**Audit findings NOT yet fixed (next round):** F4 finalized run's `estateId = estates[0]` misattributes multi-estate (md/em) runs; F5 gross ignores tapping days (spec decision needed: fixed-monthly vs per-day); Option B (a11y: drawer focus/inert, form labels) and Option C (API try/catch, res.ok checks, leave balance cap, token drift) from the audit report.
+
 ## Next / open items (resume here)
 
 1. **[User, browser]** Install the Vercel GitHub App on `jeffreyjaison/sfck` to restore auto-deploy (steps above). Then Claude verifies with a test push.
