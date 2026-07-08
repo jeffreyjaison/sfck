@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
+import dynamic from 'next/dynamic';
 import {
   Leaf,
   ArrowRight,
@@ -26,13 +27,25 @@ import {
 } from 'lucide-react';
 
 import { ProductionPulse } from '@/components/ProductionPulse';
-import { ProductionChart } from '@/components/ProductionChart';
 import { RadialGauge } from '@/components/RadialGauge';
 import { Donut } from '@/components/Donut';
 import { StatCard } from '@/components/StatCard';
 import { Timeline } from '@/components/Timeline';
 import { categoryMix } from '@/lib/widgets/mix';
 import { ROLES, type RoleId } from '@/lib/rbac';
+
+// Lazy-load the only Recharts-based widget: it sits below the fold, so keeping it out of
+// the landing's initial JS bundle cuts Total Blocking Time without affecting LCP.
+// Placeholder matches the chart's h-80 card so there is no layout shift.
+const ProductionChart = dynamic(
+  () => import('@/components/ProductionChart').then((m) => m.ProductionChart),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="h-80 w-full rounded-2xl border border-line bg-white shadow-card" aria-hidden="true" />
+    ),
+  },
+);
 
 /* ------------------------------------------------------------------ */
 /* Static demo data                                                    */
