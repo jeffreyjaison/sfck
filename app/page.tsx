@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
 import dynamic from 'next/dynamic';
 import {
@@ -194,6 +194,34 @@ function FeatureTag({ children, tone = 'emerald' }: { children: React.ReactNode;
     <span className={`inline-flex w-fit items-center gap-1.5 rounded-full px-2.5 py-1 text-[11px] font-bold uppercase tracking-wider ring-1 ${cls}`}>
       {children}
     </span>
+  );
+}
+
+// Render children only once scrolled near the viewport, so a heavy widget (and its JS
+// chunk) stays out of the initial page load — better Total Blocking Time. The placeholder
+// matches the chart's h-80 card so there is no layout shift.
+function InView({ children }: { children: React.ReactNode }) {
+  const ref = useRef<HTMLDivElement>(null);
+  const [show, setShow] = useState(false);
+  useEffect(() => {
+    const el = ref.current;
+    if (!el || show) return;
+    const io = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting) {
+          setShow(true);
+          io.disconnect();
+        }
+      },
+      { rootMargin: '250px' },
+    );
+    io.observe(el);
+    return () => io.disconnect();
+  }, [show]);
+  return (
+    <div ref={ref}>
+      {show ? children : <div className="h-80 w-full rounded-2xl border border-line bg-white shadow-card" aria-hidden="true" />}
+    </div>
   );
 }
 
@@ -437,7 +465,7 @@ export default function Landing() {
               <div className="h-full animate-rise lg:col-span-2">
                 <figure className="flex h-full flex-col">
                   <div className="mb-3"><FeatureTag>Year-on-year comparative MIS</FeatureTag></div>
-                  <ProductionChart data={BY_ESTATE} />
+                  <InView><ProductionChart data={BY_ESTATE} /></InView>
                   <figcaption className="mt-3 text-sm text-muted">
                     Current vs prior season production, estate by estate.
                   </figcaption>
