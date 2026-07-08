@@ -5,6 +5,7 @@ import { db } from '@/lib/db/client';
 import { collections, attendance, estates as estatesTable } from '@/lib/db/schema';
 import { inArray } from 'drizzle-orm';
 import { dailyTotals } from '@/lib/widgets/series';
+import { averageDrc } from '@/lib/engine/drc';
 
 export const dynamic = 'force-dynamic';
 
@@ -69,8 +70,8 @@ export async function GET(req: Request) {
     else if (w.category === 'Dependent') categoryMix.Dependent += 1;
   }
 
-  const drcSum = curCols.reduce((acc, c) => acc + Number(c.drc ?? 0), 0);
-  const avgDrc = curCols.length ? Math.round((drcSum / curCols.length) * 100 * 10) / 10 : 0;
+  // Average only over collections that carry a DRC — null samples are not 0%.
+  const avgDrc = Math.round(averageDrc(curCols.map((c) => (c.drc === null ? null : Number(c.drc)))) * 100 * 10) / 10;
 
   return NextResponse.json({
     stats: {

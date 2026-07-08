@@ -1,5 +1,18 @@
 import { describe, it, expect } from 'vitest';
-import { consolidateDrc, dryRubberKg } from './drc';
+import { consolidateDrc, dryRubberKg, averageDrc } from './drc';
+
+describe('averageDrc', () => {
+  it('averages only the collections that actually carry a DRC value', () => {
+    expect(averageDrc([0.5, null, 0.55])).toBeCloseTo(0.525, 5);
+  });
+  it('does not let null-DRC rows drag the average down (nulls are excluded, not zero)', () => {
+    expect(averageDrc([0.5, null])).toBeCloseTo(0.5, 5);
+  });
+  it('returns 0 when no collection has a DRC', () => {
+    expect(averageDrc([])).toBe(0);
+    expect(averageDrc([null, undefined])).toBe(0);
+  });
+});
 
 describe('consolidateDrc', () => {
   it('averages CC samples with factory/tanker samples into one uniform CC DRC', () => {

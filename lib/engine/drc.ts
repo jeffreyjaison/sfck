@@ -13,3 +13,10 @@ export function consolidateDrc(
 export function dryRubberKg({ latexKg, drc }: { latexKg: number; drc: number }): number {
   return latexKg * drc;
 }
+
+// Average DRC across collections that actually carry a DRC value.
+// Null/undefined rows are EXCLUDED (a missing sample is not a 0% DRC).
+export function averageDrc(values: Array<number | null | undefined>): number {
+  const xs = values.filter((v): v is number => typeof v === 'number' && Number.isFinite(v));
+  return avg(xs);
+}

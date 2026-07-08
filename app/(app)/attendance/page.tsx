@@ -1,7 +1,7 @@
 'use client';
 import { useState } from 'react';
 import { useSession } from '@/components/RoleProvider';
-import { useScopedData } from '@/lib/client-fetch';
+import { useScopedData, withSession } from '@/lib/client-fetch';
 import { StatCard } from '@/components/StatCard';
 import { Badge } from '@/components/Badge';
 
@@ -43,7 +43,7 @@ export default function AttendancePage() {
 
   const act = async (action: 'approve' | 'reject' | 'markExcess', id: number) => {
     setBusyId(id);
-    await fetch('/api/attendance', {
+    await fetch(withSession('/api/attendance', session), {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ action, id }),

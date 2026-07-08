@@ -1,7 +1,7 @@
 'use client';
 import { useMemo, useState } from 'react';
 import { useSession } from '@/components/RoleProvider';
-import { useScopedData } from '@/lib/client-fetch';
+import { useScopedData, withSession } from '@/lib/client-fetch';
 import { Badge } from '@/components/Badge';
 
 type WorkerLeave = {
@@ -43,7 +43,7 @@ export default function LeavePage() {
     setHolidayNote(null);
     setError(null);
     const holidays = Number(holidaysInPeriod) || 0;
-    const res = await fetch('/api/leave', {
+    const res = await fetch(withSession('/api/leave', session), {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({

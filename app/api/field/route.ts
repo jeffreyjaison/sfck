@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 import { sessionFromRequest } from '@/lib/api-session';
 import { workersForSession, ccsForSession } from '@/lib/db/queries';
 import { db } from '@/lib/db/client';
-import { collections, workers, collectionCentres, auditLog } from '@/lib/db/schema';
+import { collections, auditLog } from '@/lib/db/schema';
 import { eq, inArray, desc } from 'drizzle-orm';
 
 export const dynamic = 'force-dynamic';
@@ -61,10 +61,13 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'workerId, ccId, latexKg and scrapKg are required' }, { status: 400 });
     }
 
-    const [worker] = await db.select().from(workers).where(eq(workers.id, workerId));
-    const [cc] = await db.select().from(collectionCentres).where(eq(collectionCentres.id, ccId));
+    // Scope check: the worker AND the collection centre must both belong to the
+    // caller's jurisdiction (same rule the correction actions already enforce).
+    const [scopedWorkers, scopedCcs] = await Promise.all([workersForSession(session), ccsForSession(session)]);
+    const worker = scopedWorkers.find((w) => w.id === workerId);
+    const cc = scopedCcs.find((c) => c.id === ccId);
     if (!worker || !cc) {
-      return NextResponse.json({ error: 'Unknown worker or collection centre' }, { status: 400 });
+      return NextResponse.json({ error: 'Out of jurisdiction' }, { status: 403 });
     }
 
     const [inserted] = await db

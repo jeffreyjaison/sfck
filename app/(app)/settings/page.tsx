@@ -1,18 +1,19 @@
 'use client';
 import { useState } from 'react';
 import { useSession } from '@/components/RoleProvider';
-import { useScopedData } from '@/lib/client-fetch';
+import { useScopedData, withSession } from '@/lib/client-fetch';
 
 type Setting = { key: string; value: string; label: string };
 type Settings = { settings: Setting[] };
 
 function SettingRow({ setting, onSaved }: { setting: Setting; onSaved: () => void }) {
+  const { session } = useSession();
   const [value, setValue] = useState(setting.value);
   const [status, setStatus] = useState<'idle' | 'saving' | 'saved'>('idle');
 
   const save = async () => {
     setStatus('saving');
-    await fetch('/api/settings', {
+    await fetch(withSession('/api/settings', session), {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ key: setting.key, value }),

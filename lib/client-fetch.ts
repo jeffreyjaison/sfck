@@ -2,6 +2,14 @@
 import { useEffect, useState, useCallback } from 'react';
 import type { Session } from '@/lib/rbac';
 
+// Append the demo session (role + scope) to an API path. Mutating fetches must
+// use this too — the server derives jurisdiction and write-permissions from it.
+export function withSession(path: string, session: Session | null): string {
+  if (!session) return path;
+  const q = new URLSearchParams({ role: session.role, scopeId: session.scopeId?.toString() ?? '' });
+  return `${path}${path.includes('?') ? '&' : '?'}${q.toString()}`;
+}
+
 export function useScopedData<T>(path: string, session: Session | null) {
   const [data, setData] = useState<T | null>(null);
   const [loading, setLoading] = useState(true);

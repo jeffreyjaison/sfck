@@ -2,7 +2,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { useSession } from '@/components/RoleProvider';
-import { useScopedData } from '@/lib/client-fetch';
+import { useScopedData, withSession } from '@/lib/client-fetch';
 import { StatCard } from '@/components/StatCard';
 import { Badge } from '@/components/Badge';
 
@@ -64,7 +64,7 @@ export default function PayrollPage() {
   const finalize = async () => {
     setBusy(true);
     setResult(null);
-    const res = await fetch('/api/payroll', {
+    const res = await fetch(withSession('/api/payroll', session), {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({

@@ -1,7 +1,7 @@
 'use client';
 import { useState } from 'react';
 import { useSession } from '@/components/RoleProvider';
-import { useScopedData } from '@/lib/client-fetch';
+import { useScopedData, withSession } from '@/lib/client-fetch';
 import { StatCard } from '@/components/StatCard';
 import { Badge } from '@/components/Badge';
 
@@ -23,6 +23,7 @@ type Stock = {
 };
 
 function TransferControl({ item, onDone }: { item: StockItem; onDone: () => void }) {
+  const { session } = useSession();
   const [qty, setQty] = useState('');
   const [busy, setBusy] = useState(false);
 
@@ -30,7 +31,7 @@ function TransferControl({ item, onDone }: { item: StockItem; onDone: () => void
     const n = Number(qty);
     if (!Number.isFinite(n) || n <= 0) return;
     setBusy(true);
-    await fetch('/api/stock', {
+    await fetch(withSession('/api/stock', session), {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ action: 'transfer', itemId: item.id, qty: n }),
@@ -65,6 +66,7 @@ function TransferControl({ item, onDone }: { item: StockItem; onDone: () => void
 }
 
 function RequisitionForm({ ccs, onDone }: { ccs: Cc[]; onDone: () => void }) {
+  const { session } = useSession();
   const [ccId, setCcId] = useState(ccs[0]?.id.toString() ?? '');
   const [item, setItem] = useState('');
   const [qty, setQty] = useState('');
@@ -74,7 +76,7 @@ function RequisitionForm({ ccs, onDone }: { ccs: Cc[]; onDone: () => void }) {
     const n = Number(qty);
     if (!ccId || !item.trim() || !Number.isFinite(n) || n <= 0) return;
     setBusy(true);
-    await fetch('/api/stock', {
+    await fetch(withSession('/api/stock', session), {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ action: 'requisition', ccId: Number(ccId), item, qty: n }),
@@ -125,7 +127,7 @@ export default function StockPage() {
 
   const setReqStatus = async (reqId: number, status: 'Approved' | 'Rejected') => {
     setStatusBusy(reqId);
-    await fetch('/api/stock', {
+    await fetch(withSession('/api/stock', session), {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ action: 'reqStatus', reqId, status }),

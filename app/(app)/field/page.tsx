@@ -1,7 +1,7 @@
 'use client';
 import { useState } from 'react';
 import { useSession } from '@/components/RoleProvider';
-import { useScopedData } from '@/lib/client-fetch';
+import { useScopedData, withSession } from '@/lib/client-fetch';
 import { PhoneFrame } from '@/components/PhoneFrame';
 import { PrintSheet } from '@/components/PrintSheet';
 import { WeightSlip } from '@/components/WeightSlip';
@@ -32,6 +32,7 @@ type Slip = {
 type Field = { workers: Worker[]; ccs: Cc[]; recent: Recent[] };
 
 function CaptureForm({ workers, ccs, onSaved }: { workers: Worker[]; ccs: Cc[]; onSaved: (slip: Slip) => void }) {
+  const { session } = useSession();
   const [workerId, setWorkerId] = useState(workers[0]?.id.toString() ?? '');
   const [ccId, setCcId] = useState(() => {
     const w = workers[0];
@@ -58,7 +59,7 @@ function CaptureForm({ workers, ccs, onSaved }: { workers: Worker[]; ccs: Cc[]; 
     }
     setBusy(true);
     setError(null);
-    const res = await fetch('/api/field', {
+    const res = await fetch(withSession('/api/field', session), {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -165,7 +166,7 @@ function RecentRow({ row, onDone }: { row: Recent; onDone: () => void }) {
 
   const requestCorrection = async () => {
     setBusy(true);
-    await fetch('/api/field', {
+    await fetch(withSession('/api/field', session), {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ action: 'correctionRequest', collectionId: row.id }),
@@ -178,7 +179,7 @@ function RecentRow({ row, onDone }: { row: Recent; onDone: () => void }) {
 
   const approveCorrection = async () => {
     setApproving(true);
-    await fetch('/api/field', {
+    await fetch(withSession('/api/field', session), {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ action: 'approveCorrection', collectionId: row.id }),
